@@ -1,40 +1,16 @@
+#include <AFMotor.h>
 #include <Servo.h>
+
 String inputString = "";
 bool stringComplete = false;
 
-// MOTOR A -> A-1A A-1B
-// RIGHT MOTOR FRONT
-#define FR1 4    //1A
-#define FR2 5    //1B
-
-// MOTOR B -> B 1A B 1B
-// RIGHT MOTOR BACK
-#define BR1 6    //1A
-#define BR2 7    //1B
-
-// MOTOR A -> A-1A A-1B
-//LEFT MOTOR FRONT
-#define FL1 8    //1A
-#define FL2 9   //1B
-
-// MOTOR B -> B 1A B 1B
-//LEFT MOTOR BACK
-#define BL1 10    //1A
-#define BL2 11   //1B
-
-
+AF_DCMotor motor1(1); //BL
+AF_DCMotor motor2(2); //BR
+AF_DCMotor motor3(3); //FL
+AF_DCMotor motor4(4); //FR
 
 void setup()
 {
-  pinMode(BR1, OUTPUT);
-  pinMode(BR2, OUTPUT);
-  pinMode(BL1, OUTPUT);
-  pinMode(BL2, OUTPUT);
-  pinMode(FR1, OUTPUT);
-  pinMode(FR2, OUTPUT);
-  pinMode(FL1, OUTPUT);
-  pinMode(FL2, OUTPUT);
-
   //softspeed();
   Serial.begin(9600);
   delay(1000);
@@ -42,98 +18,119 @@ void setup()
   Serial.println("READY");
   Serial.println("----");
   delay(200);
+  motor1.setSpeed(200);
+  motor2.setSpeed(200);
+  motor3.setSpeed(200);
+  motor4.setSpeed(200);
 }
 
 void serialEvent()
 {
-  while (Serial.available())
-  {
+  while (Serial.available()) {
     // get the new byte:
     char inChar = (char)Serial.read();
     // add it to the inputString:
     inputString += inChar;
     // if the incoming character is a newline, set a flag so the main loop can
     // do something about it:
-    if (inChar == '\n')
-    {
+    if (inChar == '\n') {
       stringComplete = true;
     }
   }
 }
 
-
-void FW()
-{
-
-}
-void BW()
-{
-
-
-}
-
-void TL()
-{
-
-
-}
-
-void DL()
-{
-
-
-}
-void DR()
-{
-
-
-}
-
-void TR()
-{
-
-}
-
-void STOP()
-{
-
-}
-
-void loop()
-{
-
-  if (stringComplete)
-  {
+void serialReading() {
+  if (stringComplete) {
     Serial.println(inputString);
-    if (inputString == "FW\n")
-    {
+    if (inputString == "FW\n") {
       FW();
     }
-
-    if (inputString == "BW\n")
-    {
+    if (inputString == "BW\n") {
       BW();
     }
-    if (inputString == "TR\n")
-    {
-      TR();
+    if (inputString == "SR\n") {
+      SR();
     }
-
-    if (inputString == "TL\n")
-    {
-      TL();
+    if (inputString == "SL\n") {
+      SL();
     }
-    if (inputString == "STOP\n")
-    {
+    if (inputString == "STOP\n") {
       STOP();
     }
-    else
-    {
-      inputString = "";
-    }
-
     // clear the string:
     inputString = "";
     stringComplete = false;
   }
+}
+
+void FW() {
+  motor1.run(FORWARD);
+  motor2.run(FORWARD);
+  motor3.run(FORWARD);
+  motor4.run(FORWARD);
+}
+void BW() {
+  motor1.run(BACKWARD);
+  motor2.run(BACKWARD);
+  motor3.run(BACKWARD);
+  motor4.run(BACKWARD);
+}
+void SL() { //spin antihorario
+  motor1.run(BACKWARD);
+  motor2.run(FORWARD);
+  motor3.run(BACKWARD);
+  motor4.run(FORWARD);
+}
+void SR() {//spin horario
+  motor1.run(FORWARD);
+  motor2.run(BACKWARD);
+  motor3.run(FORWARD);
+  motor4.run(BACKWARD);
+}
+void FDL() { //Diagonal frente izquierda
+  motor1.run(FORWARD);
+  motor2.run(RELEASE);
+  motor3.run(RELEASE);
+  motor4.run(FORWARD);
+}
+void FDR() { //Diagonal frente derecha
+  motor1.run(RELEASE);
+  motor2.run(FORWARD);
+  motor3.run(FORWARD);
+  motor4.run(RELEASE);
+}
+void BDL() { //Diagonal atras izquierda
+  motor1.run(RELEASE);
+  motor2.run(BACKWARD);
+  motor3.run(BACKWARD);
+  motor4.run(RELEASE);
+}
+void BDR() { //Diagonal atras derecha
+  motor1.run(BACKWARD);
+  motor2.run(RELEASE);
+  motor3.run(RELEASE);
+  motor4.run(BACKWARD);
+}
+
+void LR() { //lateral derecha
+  motor1.run(BACKWARD);
+  motor2.run(FORWARD);
+  motor3.run(FORWARD);
+  motor4.run(BACKWARD);
+}
+void LL() {//lateral izquierda
+  motor1.run(FORWARD);
+  motor2.run(BACKWARD);
+  motor3.run(BACKWARD);
+  motor4.run(FORWARD);
+}
+void STOP() {
+  motor1.run(RELEASE);
+  motor2.run(RELEASE);
+  motor3.run(RELEASE);
+  motor4.run(RELEASE);
+}
+
+void loop() {
+  serialReading();
 }
