@@ -2,7 +2,6 @@ import serial
 from serial import Serial
 import time
 
-
 class SerialControl:
 
     def __init__(self, port="/dev/ttyUSB0"):
@@ -30,18 +29,30 @@ class SerialControl:
     def backward(self):
         self.serial.write('BW\n'.encode())
 
-    def turn_right(self):
-        self.serial.write('TR\n'.encode())
+    def spin_right(self):
+        self.serial.write('SR\n'.encode())
 
-    def turn_left(self):
-        self.serial.write('TL\n'.encode())
+    def spin_left(self):
+        self.serial.write('SL\n'.encode())
 
-    def direct_left(self):
-        self.serial.write('DL\n'.encode())
+    def lateral_right(self):
+        self.serial.write('LR\n'.encode())
 
-    def direct_right(self):
-        self.serial.write('DR\n'.encode())
-    
+    def lateral_left(self):
+        self.serial.write('LL\n'.encode())
+
+    def diagonal_front_right(self):
+        self.serial.write('DFR\n'.encode())
+
+    def diagonal_front_left(self):
+        self.serial.write('DFL\n'.encode())
+
+    def diagonal_back_right(self):
+        self.serial.write('DBR\n'.encode())
+
+    def diagonal_back_left(self):
+        self.serial.write('DBL\n'.encode())
+
     def stop(self):
         self.serial.write('STOP\n'.encode())
    

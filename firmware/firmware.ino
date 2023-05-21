@@ -1,3 +1,4 @@
+// https://www.elecrow.com/wiki/index.php?title=Arduino_Motor/Stepper/Servo_Shield
 #include <AFMotor.h>
 #include <Servo.h>
 
@@ -54,6 +55,24 @@ void serialReading() {
     if (inputString == "SL\n") {
       SL();
     }
+    if (inputString == "LR\n") {
+      LR();
+    }
+    if (inputString == "LL\n") {
+      LL();
+    }
+    if (inputString == "DFR\n") {
+      DFR();
+    }
+    if (inputString == "DFL\n") {
+      DFL();
+    }
+    if (inputString == "DBR\n") {
+      DBR();
+    }
+    if (inputString == "DBL\n") {
+      DBL();
+    }
     if (inputString == "STOP\n") {
       STOP();
     }
@@ -87,25 +106,25 @@ void SR() {//spin horario
   motor3.run(FORWARD);
   motor4.run(BACKWARD);
 }
-void FDL() { //Diagonal frente izquierda
+void DFL() { //Diagonal frente izquierda
   motor1.run(FORWARD);
   motor2.run(RELEASE);
   motor3.run(RELEASE);
   motor4.run(FORWARD);
 }
-void FDR() { //Diagonal frente derecha
+void DFR() { //Diagonal frente derecha
   motor1.run(RELEASE);
   motor2.run(FORWARD);
   motor3.run(FORWARD);
   motor4.run(RELEASE);
 }
-void BDL() { //Diagonal atras izquierda
+void DBL() { //Diagonal atras izquierda
   motor1.run(RELEASE);
   motor2.run(BACKWARD);
   motor3.run(BACKWARD);
   motor4.run(RELEASE);
 }
-void BDR() { //Diagonal atras derecha
+void DBR() { //Diagonal atras derecha
   motor1.run(BACKWARD);
   motor2.run(RELEASE);
   motor3.run(RELEASE);
