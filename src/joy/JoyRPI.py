@@ -7,10 +7,7 @@ import time
 
 global x_axis
 global y_axis
-
-base_comm = SerialControl("COM4")
-base_comm.open_serial()
-time.sleep(2)
+global base_comm
 
 def call_moves(x=0,y=0,a=0, b=0):
 
@@ -72,4 +69,7 @@ def main():
             process_joystick(joystick_values)
 
 if __name__ == "__main__":
+    base_comm = SerialControl(port="/dev/ttyACM0")
+    base_comm.open_serial()
+    time.sleep(1)
     main()
