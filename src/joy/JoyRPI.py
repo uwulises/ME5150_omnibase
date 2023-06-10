@@ -5,37 +5,21 @@ sys.path.append('../')
 from serial_control.SerialControl import SerialControl
 import time 
 
-global x_axis
-global y_axis
 global base_comm
+global previous_x_value
+global previous_y_value
+previous_x_value = 0
+previous_y_value = 0
 
-def call_moves(x=0,y=0,a=0, b=0):
+def process_joystick(x_val,y_val):
 
-    base_comm.forward() if y>0 else base_comm.backward()
-    time.sleep(0.5)
-
-
-def process_joystick(joystick=[0,0]):
-    """
-    Process joystick values and perform actions.
-    Modify this function according to your requirements.
-    """
-    x_axis = joystick[0]
-    y_axis = joystick[1]
-
-    # Example action based on joystick values
-    if x_axis < -0.5:
-        print("Left")
-    elif x_axis > 0.5:
-        print("Right")
-    elif y_axis < -0.5:
-        print("Up")
-        call_moves(y=y_axis)
-    elif y_axis > 0.5:
-        print("Down")
-        call_moves(y=y_axis)
-    else:
-        print("Neutral")
+    if  x_val != previous_x_value:
+        base_comm.forward() if x_val>0 else base_comm.backward()
+    elif y_val != previous_y_value:
+        base_comm.lateral_right() if y_val>0 else base_comm.lateral_left()
+    
+    previous_x_value = x_val
+    previous_y_value = y_val
 
 def main():
     
@@ -49,12 +33,6 @@ def main():
             gamepad = device
             break
 
-    if gamepad is None:
-        print("No Xbox wireless controller found")
-        return
-
-    print("Xbox wireless controller found:", gamepad.name)
-
     # Process gamepad input
     for event in gamepad.read_loop():
         if event.type == ecodes.EV_ABS:
@@ -65,8 +43,7 @@ def main():
                 x_axis = absevent.event.value / 32767.0
             elif absevent.event.code == ecodes.ABS_Y:
                 y_axis = absevent.event.value / 32767.0
-            joystick_values = [x_axis, y_axis]
-            process_joystick(joystick_values)
+            process_joystick(x_axis,y_axis)
 
 if __name__ == "__main__":
     base_comm = SerialControl(port="/dev/ttyACM0")
