@@ -1,6 +1,5 @@
 // https://www.elecrow.com/wiki/index.php?title=Arduino_Motor/Stepper/Servo_Shield
 #include <AFMotor.h>
-#include <Servo.h>
 
 String inputString = "";
 bool stringComplete = false;
@@ -42,7 +41,7 @@ void serialEvent()
 
 void serialReading() {
   if (stringComplete) {
-    Serial.println(inputString);
+    //Serial.println(inputString);
     if (inputString == "FW\n") {
       FW();
     }
