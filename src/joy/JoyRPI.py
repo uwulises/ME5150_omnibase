@@ -19,10 +19,10 @@ def process_joystick(x_val,y_val):
     elif (y_val==-1 and x_val==0):
         base_comm.backward()
 
-    elif (x_val==1 and y_val==0):
+    elif (x_val==-1 and y_val==0):
         base_comm.lateral_right()
 
-    elif (x_val==-1 and y_val==0):
+    elif (x_val==1 and y_val==0):
         base_comm.lateral_left()
     
     elif (x_val==0 and y_val==0):
