@@ -35,6 +35,9 @@ try:
             client_socket.sendall(command.encode())
 
             if key_event.name == 'esc':
+                command = 'stop'
+                # Send the command to the server
+                client_socket.sendall(command.encode())
                 break
 
 finally:
