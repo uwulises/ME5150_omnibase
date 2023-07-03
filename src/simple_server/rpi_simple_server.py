@@ -8,7 +8,7 @@ import time
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Set up the server address and port
-server_address = ('192.168.73.199', 5000)  # Use any available IP address
+server_address = ('omni2.local', 5000)  # Use any available IP address
 server_socket.bind(server_address)
 
 base_comm = SerialControl()

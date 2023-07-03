@@ -2,7 +2,7 @@ import socket
 import keyboard
 
 # Set up the server address and port
-server_address = '192.168.73.199'  # Replace with the IP address of your Raspberry Pi
+server_address = 'omni2.local'  # Replace with the IP/hostname address of your Raspberry Pi
 server_port = 5000
 
 # Create a TCP/IP socket
