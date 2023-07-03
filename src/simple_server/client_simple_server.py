@@ -19,13 +19,14 @@ try:
 
         if key_event.event_type == 'down':
             # Map key press events to commands
-            if key_event.name == 'up':
+            print(key_event.name)
+            if key_event.name == 'flecha arriba':
                 command = 'forward'
-            elif key_event.name == 'down':
+            elif key_event.name == 'flecha abajo':
                 command = 'backward'
-            elif key_event.name == 'left':
+            elif key_event.name == 'flecha izquierda':
                 command = 'spin_L'
-            elif key_event.name == 'right':
+            elif key_event.name == 'flecha derecha':
                 command = 'spin_R'
             else:
                 command = 'stop'
