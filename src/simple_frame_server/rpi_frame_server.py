@@ -7,7 +7,7 @@ import io
 async def send_video(websocket, path):
     # Set up the Raspberry Pi camera
     camera = picamera.PiCamera()
-    camera.resolution = (640, 480)
+    camera.resolution = (320, 240)
 
     frame_count = 0
     max_frame_count = 5  # Number of frames to skip before sending a frame
