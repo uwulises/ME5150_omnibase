@@ -19,14 +19,13 @@ class RemoteControl:
 
                 if key_event.event_type == 'down':
                     # Map key press events to commands
-                    print(key_event.name)
-                    if key_event.name == 'up':
+                    if key_event.name == 'w':
                         command = 'forward'
-                    elif key_event.name == 'down':
+                    elif key_event.name == 's':
                         command = 'backward'
-                    elif key_event.name == 'left':
+                    elif key_event.name == 'a':
                         command = 'spin_L'
-                    elif key_event.name == 'right':
+                    elif key_event.name == 'd':
                         command = 'spin_R'
                     else:
                         command = 'stop'
