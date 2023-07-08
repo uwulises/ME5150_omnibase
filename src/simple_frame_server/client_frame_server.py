@@ -4,29 +4,37 @@ import base64
 import cv2
 import numpy as np
 
-async def receive_video():
-    async with websockets.connect('ws://omni.local:8765',ping_interval=None) as websocket:
-        try:
-            while True:
-                # Receive the frame from the server
-                encoded_image = await websocket.recv()
+class VideoReceiver:
+    def __init__(self, server_url):
+        self.server_url = server_url
 
-                # Decode the base64 encoded frame
-                decoded_image = base64.b64decode(encoded_image)
+    async def receive_video(self):
+        async with websockets.connect(self.server_url, ping_interval=None) as websocket:
+            try:
+                while True:
+                    # Receive the frame from the server
+                    encoded_image = await websocket.recv()
 
-                # Convert the frame to NumPy array
-                np_arr = np.frombuffer(decoded_image, dtype=np.uint8)
+                    # Decode the base64 encoded frame
+                    decoded_image = base64.b64decode(encoded_image)
 
-                # Decode the image array using OpenCV
-                frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+                    # Convert the frame to NumPy array
+                    np_arr = np.frombuffer(decoded_image, dtype=np.uint8)
 
-                # Display the frame
-                cv2.imshow('Video Stream', frame)
-                if cv2.waitKey(1) == 27:
-                    break
+                    # Decode the image array using OpenCV
+                    frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-        finally:
-            cv2.destroyAllWindows()
+                    # Display the frame
+                    cv2.imshow('Video Stream', frame)
+                    if cv2.waitKey(1) == 27:
+                        break
 
-# Start the video stream reception
-asyncio.get_event_loop().run_until_complete(receive_video())
+            finally:
+                cv2.destroyAllWindows()
+
+    def start_receiving(self):
+        asyncio.get_event_loop().run_until_complete(self.receive_video())
+
+# Usage:
+receiver = VideoReceiver('ws://omni.local:8765')
+receiver.start_receiving()
