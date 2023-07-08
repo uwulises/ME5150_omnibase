@@ -1,33 +1,32 @@
 import asyncio
 import websockets
 import base64
-import io
-from PIL import Image
-import numpy as np
 import cv2
-from collections import deque
+import numpy as np
+
 async def receive_video():
-    async with websockets.connect('ws://192.168.255.199:8765') as websocket:
-        frame_buffer = deque(maxlen=10)  # Buffer to store a maximum of 10 frames
+    async with websockets.connect('ws://omni.local:8765',ping_interval=None) as websocket:
+        try:
+            while True:
+                # Receive the frame from the server
+                encoded_image = await websocket.recv()
 
-        while True:
-            # Receive the frame from the server
-            encoded_frame = await websocket.recv()
+                # Decode the base64 encoded frame
+                decoded_image = base64.b64decode(encoded_image)
 
-            # Add the frame to the buffer
-            frame_buffer.append(encoded_frame)
+                # Convert the frame to NumPy array
+                np_arr = np.frombuffer(decoded_image, dtype=np.uint8)
 
-            # Process frames in the buffer
-            for frame in frame_buffer:
-                # Decode and display the frame
-                image_bytes = base64.b64decode(frame)
-                np_array = np.frombuffer(image_bytes, np.uint8)
-                frame = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
-                cv2.imshow("Video", frame)
-                cv2.waitKey(1)
+                # Decode the image array using OpenCV
+                frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-            # Clear the buffer
-            frame_buffer.clear()
+                # Display the frame
+                cv2.imshow('Video Stream', frame)
+                if cv2.waitKey(1) == 27:
+                    break
 
-# Run the client
+        finally:
+            cv2.destroyAllWindows()
+
+# Start the video stream reception
 asyncio.get_event_loop().run_until_complete(receive_video())
