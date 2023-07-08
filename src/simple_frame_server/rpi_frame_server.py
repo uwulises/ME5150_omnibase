@@ -5,52 +5,57 @@ import picamera
 import io
 import time
 
-async def send_video(websocket, path):
-    # Set up the Raspberry Pi camera
-    camera = picamera.PiCamera()
-    camera.resolution = (320, 240)
-    time.sleep(1)
+class VideoServer:
+    def __init__(self):
+        self.camera = None
+        self.frame_count = 0
+        self.max_frame_count = 2
 
-    frame_count = 0
-    max_frame_count = 2  # Number of frames to skip before sending a frame
+    async def send_video(self, websocket, path):
+        # Set up the Raspberry Pi camera
+        self.camera = picamera.PiCamera()
+        self.camera.resolution = (320, 240)
+        time.sleep(1)
 
-    try:
-        # Continuously capture and send video frames
-        while True:
-            # Capture a frame
-            stream = io.BytesIO()
-            camera.capture(stream, format='jpeg', use_video_port=True)
+        try:
+            # Continuously capture and send video frames
+            while True:
+                # Capture a frame
+                stream = io.BytesIO()
+                self.camera.capture(stream, format='jpeg', use_video_port=True)
 
-            # Skip frames according to the frame count
-            frame_count += 1
-            if frame_count % max_frame_count != 0:
-                # Delete the captured frame without sending it
+                # Skip frames according to the frame count
+                self.frame_count += 1
+                if self.frame_count % self.max_frame_count != 0:
+                    # Delete the captured frame without sending it
+                    stream.close()
+                    continue
+
+                # Read the captured frame
+                stream.seek(0)
+                encoded_image = base64.b64encode(stream.read()).decode('utf-8')
+
+                try:
+                    # Send the frame to the client
+                    await websocket.send(encoded_image)
+                except websockets.exceptions.ConnectionClosed:
+                    # Connection closed by the client
+                    print("Client connection closed")
+                    break
+
+                # Delete the captured frame
                 stream.close()
-                continue
 
-            # Read the captured frame
-            stream.seek(0)
-            encoded_image = base64.b64encode(stream.read()).decode('utf-8')
+        finally:
+            # Clean up resources
+            self.camera.close()
 
-            try:
-                # Send the frame to the client
-                await websocket.send(encoded_image)
-            except websockets.exceptions.ConnectionClosed:
-                # Connection closed by the client
-                print("Client connection closed")
-                break
+    async def start_server(self):
+        server = await websockets.serve(self.send_video, '0.0.0.0', 8765)
 
-            # Delete the captured frame
-            stream.close()
+        # Keep the server running until interrupted
+        await server.wait_closed()
 
-    finally:
-        # Clean up resources
-        camera.close()
-
-async def start_server():
-    server = await websockets.serve(send_video, '0.0.0.0', 8765)
-
-    # Keep the server running until interrupted
-    await server.wait_closed()
-
-asyncio.run(start_server())
+if __name__ == "__main__":
+    video_server = VideoServer()
+    asyncio.run(video_server.start_server())
