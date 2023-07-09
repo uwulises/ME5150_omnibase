@@ -15,6 +15,9 @@ class VideoServer:
         # Set up the Raspberry Pi camera
         self.camera = picamera.PiCamera()
         self.camera.resolution = (320, 240)
+        self.camera.iso = 800
+        self.camera.awb_mode = 'sunlight'
+        self.camera.shutter_speed = 30000
         time.sleep(1)
 
         try:
