@@ -1,5 +1,2 @@
-picamera==1.13
-pyserial==3.5
-screen==1.0.1
 websocket-client==1.6.1
 websockets==11.0.3
