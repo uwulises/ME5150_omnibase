@@ -111,9 +111,9 @@ class DriveServer:
                     elif data == 'spin_R':
                         self.base_comm.spin_right()
                     elif data == 'lateral_left':
-                        self.base_comm.left()
+                        self.base_comm.lateral_left()
                     elif data == 'lateral_right':
-                        self.base_comm.right()
+                        self.base_comm.lateral_right()
                     elif data == 'stop':
                         self.base_comm.stop()
                     else:
