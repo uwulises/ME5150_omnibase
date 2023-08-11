@@ -26,7 +26,7 @@ class VideoReceiver:
 
                     # Decode the image array using OpenCV
                     frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-
+                    #probar un filtro de imagen 
                     # Display the frame
                     cv2.imshow('Video Stream', frame)
                     if cv2.waitKey(1) == 27:
@@ -62,10 +62,14 @@ class RemoteControl:
                         command = 'forward'
                     elif key_event.name == 's':
                         command = 'backward'
-                    elif key_event.name == 'a':
+                    elif key_event.name == 'q':
                         command = 'spin_L'
-                    elif key_event.name == 'd':
+                    elif key_event.name == 'e':
                         command = 'spin_R'
+                    elif key_event.name == 'a':
+                        command = 'lateral_left'
+                    elif key_event.name == 'd':
+                        command = 'lateral_right'
                     else:
                         command = 'stop'
 
@@ -91,8 +95,8 @@ def run_remote_control(server_address, server_port):
     remote_control.connect()
 
 def main():
-    server_url = 'ws://omni.local:8765'  # Replace with the WebSocket server URL
-    server_address = 'omni.local'  # Replace with the IP/hostname address of your Raspberry Pi
+    server_url = 'ws://omni2.local:8765'  # Replace with the WebSocket server URL
+    server_address = 'omni2.local'  # Replace with the IP/hostname address of your Raspberry Pi
     server_port = 5000
 
     video_thread = threading.Thread(target=run_video_receiver, args=(server_url,))
