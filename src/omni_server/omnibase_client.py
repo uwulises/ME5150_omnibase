@@ -70,6 +70,14 @@ class RemoteControl:
                         command = 'lateral_left'
                     elif key_event.name == 'd':
                         command = 'lateral_right'
+                    elif key_event.name == 't':
+                        command = 'diagonal_front_left'
+                    elif key_event.name == 'r':
+                        command = 'diagonal_front_right'
+                    elif key_event.name == 'g':
+                        command = 'diagonal_back_left'
+                    elif key_event.name == 'f':
+                        command = 'diagonal_back_right'
                     else:
                         command = 'stop'
 

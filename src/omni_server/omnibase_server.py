@@ -114,6 +114,14 @@ class DriveServer:
                         self.base_comm.lateral_left()
                     elif data == 'lateral_right':
                         self.base_comm.lateral_right()
+                    elif data == 'diagonal_front_left':
+                        self.base_comm.diagonal_front_left()
+                    elif data == 'diagonal_front_right':
+                        self.base_comm.diagonal_front_right()
+                    elif data == 'diagonal_back_left':
+                        self.base_comm.diagonal_back_left()
+                    elif data == 'diagonal_back_right':
+                        self.base_comm.diagonal_back_right()
                     elif data == 'stop':
                         self.base_comm.stop()
                     else:
