@@ -70,14 +70,6 @@ class RemoteControl:
                         command = 'lateral_left'
                     elif key_event.name == 'd':
                         command = 'lateral_right'
-                    elif key_event.name == 't':
-                        command = 'diagonal_front_left'
-                    elif key_event.name == 'r':
-                        command = 'diagonal_front_right'
-                    elif key_event.name == 'g':
-                        command = 'diagonal_back_left'
-                    elif key_event.name == 'f':
-                        command = 'diagonal_back_right'
                     else:
                         command = 'stop'
 
@@ -103,8 +95,8 @@ def run_remote_control(server_address, server_port):
     remote_control.connect()
 
 def main():
-    server_url = 'ws://omni2.local:8765'  # Replace with the WebSocket server URL
-    server_address = 'omni2.local'  # Replace with the IP/hostname address of your Raspberry Pi
+    server_url = 'ws://192.168.246.199:8765'  # Replace with the WebSocket server URL
+    server_address = '192.168.246.199'  # Replace with the IP/hostname address of your Raspberry Pi
     server_port = 5000
 
     video_thread = threading.Thread(target=run_video_receiver, args=(server_url,))
