@@ -8,6 +8,7 @@ import socket
 import pygame
 import time
 
+
 class VideoReceiver:
     def __init__(self, server_url):
         self.server_url = server_url
@@ -18,7 +19,7 @@ class VideoReceiver:
                 while True:
                     # Receive the frame from the server
                     encoded_image = await websocket.recv()
-
+                   
                     # Decode the base64 encoded frame
                     decoded_image = base64.b64decode(encoded_image)
 
@@ -28,6 +29,7 @@ class VideoReceiver:
                     # Decode the image array using OpenCV
                     frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
                     #probar un filtro de imagen 
+                    #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                     # Display the frame
                     cv2.imshow('Video Stream', frame)
                     if cv2.waitKey(1) == 27:
@@ -35,6 +37,7 @@ class VideoReceiver:
 
             finally:
                 cv2.destroyAllWindows()
+
 
     def start_receiving(self):
         loop = asyncio.new_event_loop()
@@ -93,18 +96,18 @@ class RemoteControl:
                         if current_time - last_action_time > min_time_between_actions:
                             if abs(x_axis) > action_threshold and abs(y_axis)> action_threshold:
                                 if x_axis > 0 and y_axis > 0:
-                                    command = "diagonal_back_left"
-                                elif x_axis > 0 and y_axis < 0:
-                                    command = "diagonal_front_left"
-                                elif x_axis < 0 and y_axis > 0:
                                     command = "diagonal_back_right"
-                                elif x_axis < 0 and y_axis < 0:
+                                elif x_axis > 0 and y_axis < 0:
                                     command = "diagonal_front_right"
+                                elif x_axis < 0 and y_axis > 0:
+                                    command = "diagonal_back_left"
+                                elif x_axis < 0 and y_axis < 0:
+                                    command = "diagonal_front_left"
                             elif abs(x_axis)> action_threshold:
                                 if x_axis > 0:
-                                    command = "lateral_left"
-                                else:
                                     command = "lateral_right"
+                                else:
+                                    command = "lateral_left"
                             elif abs(y_axis) > action_threshold:
                                 if y_axis > 0:
                                     command = "backward"
@@ -129,7 +132,7 @@ class RemoteControl:
                                 command = 'stop'
                                 # Send the command to the server
                                 self.client_socket.sendall(command.encode())
-                                print("Enviando comando1:", command)
+                                print("Enviando comando de cierre:", command)
                                 exit()
 
 
@@ -146,18 +149,24 @@ def run_remote_control(server_address, server_port):
     remote_control.connect()
 
 def main():
-    server_url = 'ws://192.168.246.199:8765'  # Replace with the WebSocket server URL
-    server_address = '192.168.246.199'  # Replace with the IP/hostname address of your Raspberry Pi
+    server_url =  'ws://192.168.0.103:8765'  # Replace with the WebSocket server URL
+    #server_url = 'ws://omni.local:8765'
+    server_address = '192.168.0.103'
+    #server_url =  'ws://192.168.80.156:8765'  # Replace with the WebSocket server URL
+    # server_address = '192.168.246.199'  # Replace with the IP/hostname address of your Raspberry Pi
     server_port = 5000
 
     video_thread = threading.Thread(target=run_video_receiver, args=(server_url,))
     remote_control_thread = threading.Thread(target=run_remote_control, args=(server_address, server_port))
 
+
     video_thread.start()
     remote_control_thread.start()
 
+
     video_thread.join()
     remote_control_thread.join()
+
 
 if __name__ == "__main__":
     main()
