@@ -32,6 +32,7 @@ class VideoServer:
                 stream = io.BytesIO()
                 self.camera.capture(stream, format='jpeg', use_video_port=True)
 
+
                 # Skip frames according to the frame count
                 self.frame_count += 1
                 if self.frame_count % self.max_frame_count != 0:
@@ -135,7 +136,7 @@ class DriveServer:
 
 if __name__ == "__main__":
     video_server = VideoServer()
-    drive_server = DriveServer('omni.local', 5000)
+    drive_server = DriveServer('omni2.local', 5000)
 
     # Start video server in a separate thread
     video_thread = Thread(target=asyncio.run, args=(video_server.start_server(),))

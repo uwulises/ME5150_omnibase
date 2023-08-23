@@ -7,38 +7,40 @@ import numpy as np
 import socket
 import keyboard
 
-class VideoReceiver:
-    def __init__(self, server_url):
-        self.server_url = server_url
+# class VideoReceiver:
+#     def __init__(self, server_url):
+#         self.server_url = server_url
 
-    async def receive_video(self):
-        async with websockets.connect(self.server_url, ping_interval=None) as websocket:
-            try:
-                while True:
-                    # Receive the frame from the server
-                    encoded_image = await websocket.recv()
+#     async def receive_video(self):
+#         async with websockets.connect(self.server_url, ping_interval=None) as websocket:
+#             try:
+#                 while True:
+#                     # Receive the frame from the server
+#                     encoded_image = await websocket.recv()
 
-                    # Decode the base64 encoded frame
-                    decoded_image = base64.b64decode(encoded_image)
+#                     # Decode the base64 encoded frame
+#                     decoded_image = base64.b64decode(encoded_image)
 
-                    # Convert the frame to NumPy array
-                    np_arr = np.frombuffer(decoded_image, dtype=np.uint8)
+#                     # Convert the frame to NumPy array
+#                     np_arr = np.frombuffer(decoded_image, dtype=np.uint8)
 
-                    # Decode the image array using OpenCV
-                    frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-                    #probar un filtro de imagen 
-                    # Display the frame
-                    cv2.imshow('Video Stream', frame)
-                    if cv2.waitKey(1) == 27:
-                        break
+#                     # Decode the image array using OpenCV
+#                     frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+#                     # Aplicar preprocesamiento de imagen
+#                     #img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                 
+#                     # Display the frame
+#                     cv2.imshow('Video Stream', frame)
+#                     if cv2.waitKey(1) == 27:
+#                         break
 
-            finally:
-                cv2.destroyAllWindows()
+#             finally:
+#                 cv2.destroyAllWindows()
 
-    def start_receiving(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.receive_video())
+    # def start_receiving(self):
+    #     loop = asyncio.new_event_loop()
+    #     asyncio.set_event_loop(loop)
+    #     loop.run_until_complete(self.receive_video())
 
 class RemoteControl:
     def __init__(self, server_address, server_port):
@@ -62,14 +64,10 @@ class RemoteControl:
                         command = 'forward'
                     elif key_event.name == 's':
                         command = 'backward'
-                    elif key_event.name == 'q':
-                        command = 'spin_L'
-                    elif key_event.name == 'e':
-                        command = 'spin_R'
                     elif key_event.name == 'a':
-                        command = 'lateral_left'
+                        command = 'spin_L'
                     elif key_event.name == 'd':
-                        command = 'lateral_right'
+                        command = 'spin_R'
                     else:
                         command = 'stop'
 
@@ -86,26 +84,26 @@ class RemoteControl:
             # Close the client socket
             self.client_socket.close()
 
-def run_video_receiver(server_url):
-    video_receiver = VideoReceiver(server_url)
-    video_receiver.start_receiving()
+# def run_video_receiver(server_url):
+#     video_receiver = VideoReceiver(server_url)
+#     video_receiver.start_receiving()
 
 def run_remote_control(server_address, server_port):
     remote_control = RemoteControl(server_address, server_port)
     remote_control.connect()
 
 def main():
-    server_url = 'ws://192.168.246.199:8765'  # Replace with the WebSocket server URL
-    server_address = '192.168.246.199'  # Replace with the IP/hostname address of your Raspberry Pi
+    server_url = 'ws://192.168.0.103:8765'  # Replace with the WebSocket server URL
+    server_address = 'omni2.local'
     server_port = 5000
 
-    video_thread = threading.Thread(target=run_video_receiver, args=(server_url,))
+    #video_thread = threading.Thread(target=run_video_receiver, args=(server_url,))
     remote_control_thread = threading.Thread(target=run_remote_control, args=(server_address, server_port))
 
-    video_thread.start()
+    #video_thread.start()
     remote_control_thread.start()
 
-    video_thread.join()
+    #video_thread.join()
     remote_control_thread.join()
 
 if __name__ == "__main__":
