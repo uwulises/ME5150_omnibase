@@ -78,14 +78,14 @@ void serialReading() {
     //take the 6 first characters of the string
     //and compare it with "CMDVEL" 
     if (inputString.substring(0, 6) == "CMDVEL") {
-      //take the 7th character of the string
-      int axial_speed = inputString.substring(6, 9).toInt();
-      int angular_speed = inputString.substring(9, 12).toInt();
-      // divide by 10.0 and convert to float to get the decimal point
-      float axial_speed_f = axial_speed / 10.0;
-      float angular_speed_f = angular_speed / 10.0;
+      //take and split the next 6 characters of the string
+      int vx_speed = inputString.substring(6, 9).toInt();
+      int vy_speed = inputString.substring(9, 12).toInt();
+      // divide by 10.0 and convert to float to get the decimal point (m/s)
+      float vx_speed_f = vx_speed / 10.0;
+      float vy_speed_f = vy_speed / 10.0;
       //call cmd vel function
-      cmd_vel(axial_speed_f, angular_speed_f);
+      cmd_vel(vx_speed_f, vy_speed_f);
     }
     // clear the string:
     inputString = "";
@@ -94,14 +94,22 @@ void serialReading() {
 }
 
 //call motors function to move the robot, takes an array of 4 floats as argument
-void motors(float w[4]) {
+void call_motors(float w[4]) {
+  AF_DCMotor motor[4] = {motor1, motor2, motor3, motor4};
+  //set direction of each motor from the array, use the sign and magnitude of the speed
+  for (int i = 0; i < 4; i++) {
+    //use the index for call "motor1", "motor2", "motor3" and "motor4" to use setSpeed and run functions
+    motor[i].setSpeed(abs(w[i]));
+    //set the direction of each motor
+    motor[i].run(w[i] > 0 ? FORWARD : BACKWARD);
+  }
 }
 
 // cmd_vel function that takes two floats as arguments of mecanum wheeled robot
 void cmd_vel(float vx, float vy) {
   // Te distance between the center of the robot and the wheel D=0.1m and the radius of the wheel R=0.05m
-  float D = 0.15;
-  float R = 0.05;
+  float D = 0.145;
+  float R = 0.06;
   int w_max = 400;
   //create a v array to store the speed of each wheel
   float w[4];
@@ -113,10 +121,15 @@ void cmd_vel(float vx, float vy) {
   for (int i = 0; i < 4; i++) {
     w[i] = w[i] * 60 / (2 * PI * R);
     w[i] = w[i] * 255 / w_max;
+    Serial.print(w[i]);
+    Serial.print(" ");
+    
   }
-
+   Serial.println(" ");
    //call a function that takes the v array as argument and move the wheels.
-  motors(w);
+  call_motors(w);
+  
+  
 
   
 }
