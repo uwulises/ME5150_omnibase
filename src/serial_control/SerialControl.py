@@ -53,10 +53,3 @@ class SerialControl:
         time.sleep(0.2)
         self.serial.close()
         self.serial_port = "Close"
-
-
-# main 
-if __name__ == '__main__':
-    robot = SerialControl(port="COM6")
-    robot.open_serial()
-    robot.send_command('cmd_vel', cmd_vel=[0.1, 0.0])
