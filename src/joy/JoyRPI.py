@@ -40,6 +40,9 @@ def main():
         if "X-Box" in device.name:
             gamepad = device
             break
+        elif "ShanWan" in device.name:
+            gamepad = device
+            break
 
     # Process gamepad input
     for event in gamepad.read_loop():
