@@ -26,7 +26,7 @@ class SerialControl:
             self.serial.open()
 
     # Send a command to the Arduino
-    def send_command(self, command):
+    def send_command(self, command, cmd_vel=[0.0,0.0]):
         # Match case structure to send the right command to arduino
         switcher = {
             'forward': 'FW\n',
@@ -39,6 +39,7 @@ class SerialControl:
             'diagonal_front_left': 'DFL\n',
             'diagonal_back_right': 'DBR\n',
             'diagonal_back_left': 'DBL\n',
+            'cmd_vel': 'CMDVEL' + str(int(10*cmd_vel[0])).zfill(3) + str(int(10*cmd_vel[1])).zfill(3) + '\n',
             'stop': 'STOP\n'
         }
         # Get the function from switcher dictionary
