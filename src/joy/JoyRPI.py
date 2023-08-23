@@ -53,6 +53,7 @@ def main():
             elif absevent.event.code == ecodes.ABS_Y:
                 y_axis = absevent.event.value / 32767.0
             process_joystick(x_axis,y_axis)
+            print(x_axis,y_axis)
 
 if __name__ == "__main__":
     base_comm = SerialControl()
