@@ -4,29 +4,27 @@ import sys
 sys.path.append('../')
 from serial_control.SerialControl import SerialControl
 import time 
-  
+
+# Process joystick input
 def process_joystick(x_val,y_val):
 
     x_val=round(x_val)
     y_val=round(y_val)
 
-    if (x_val==0 and y_val==0):
-        base_comm.stop()
-
-    elif (y_val==1 and x_val==0):
-        base_comm.forward()
+    if (y_val==1 and x_val==0):
+        base_comm.send_command('forward')
 
     elif (y_val==-1 and x_val==0):
-        base_comm.backward()
+        base_comm.send_command('backward')
 
     elif (x_val==-1 and y_val==0):
-        base_comm.lateral_right()
+        base_comm.send_command('lateral_right')
 
     elif (x_val==1 and y_val==0):
-        base_comm.lateral_left()
-    
-    elif (x_val==0 and y_val==0):
-        base_comm.stop()
+        base_comm.send_command('lateral_left')
+
+    else:
+        base_comm.send_command('stop')
 
 def main():
     global x_axis
