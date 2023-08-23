@@ -100,20 +100,8 @@ class DriveServer:
                     if not data:
                         # No more data from the client
                         break
-
-                    # Process the received data and control the motors
-                    if data == 'forward':
-                        self.base_comm.forward()
-                    elif data == 'backward':
-                        self.base_comm.backward()
-                    elif data == 'spin_L':
-                        self.base_comm.spin_left()
-                    elif data == 'spin_R':
-                        self.base_comm.spin_right()
-                    elif data == 'stop':
-                        self.base_comm.stop()
-                    else:
-                        print(f'Invalid command: {data}')
+                    # Send data string to Serial Control class
+                    self.base_comm.send_command(data)
 
                 print(f'Client disconnected: {client_address}')
 

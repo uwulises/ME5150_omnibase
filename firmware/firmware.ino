@@ -4,7 +4,7 @@
 String inputString = "";
 bool stringComplete = false;
 
-AF_DCMotor motor1(1); //BL
+AF_DCMotor motor1(1); //BL 
 AF_DCMotor motor2(2); //BR
 AF_DCMotor motor3(3); //FL
 AF_DCMotor motor4(4); //FR
