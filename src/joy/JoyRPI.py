@@ -4,6 +4,7 @@ import sys
 sys.path.append('../')
 from serial_control.SerialControl import SerialControl
 import time 
+import numpy as np
 
 # Process joystick input
 def process_joystick(x_val,y_val):
@@ -11,13 +12,13 @@ def process_joystick(x_val,y_val):
     x_val=round(x_val)
     y_val=round(y_val)
     #create a vector with the joystick values
-    joystick_vector=[x_val,y_val]
+    joystick_vector=(x_val,y_val)
 
     # Match the vector to command
     switcher = {
-        [128,128]: 'stop',
-        [255,0]: 'forward',
-        [0,255]: 'backward'}
+        (128,128): 'stop',
+        (255,0): 'forward',
+        (0,255): 'backward'}
 
     func = switcher.get(joystick_vector, lambda: "Invalid command")
     base_comm.send_command(func)
