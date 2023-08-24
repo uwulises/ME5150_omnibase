@@ -30,16 +30,16 @@ class SerialControl:
         # Match case structure to send the right command to arduino
         vel= str(int(10*cmd_vel[0])).zfill(3) + str(int(10*cmd_vel[1])).zfill(3)
         switcher = {
-            'forward': 'FW\n',
-            'backward': 'BW\n',
-            'spin_right': 'SR\n',
-            'spin_left': 'SL\n',
-            'lateral_right': 'LR\n',
-            'lateral_left': 'LL\n',
-            'diagonal_front_right': 'DFR\n',
-            'diagonal_front_left': 'DFL\n',
-            'diagonal_back_right': 'DBR\n',
-            'diagonal_back_left': 'DBL\n',
+            'forward': '1\n',
+            'backward': '2\n',
+            'spin_right': '3\n',
+            'spin_left': '4\n',
+            'lateral_right': '5\n',
+            'lateral_left': '6\n',
+            'diagonal_front_right': '7\n',
+            'diagonal_front_left': '8\n',
+            'diagonal_back_right': '9\n',
+            'diagonal_back_left': '10\n',
             'cmd_vel': 'CMDVEL' + vel + '\n',
             'stop': 'STOP\n'
         }
