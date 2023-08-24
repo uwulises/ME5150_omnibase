@@ -10,21 +10,18 @@ def process_joystick(x_val,y_val):
 
     x_val=round(x_val)
     y_val=round(y_val)
+    #create a vector with the joystick values
+    joystick_vector=[x_val,y_val]
 
-    if (y_val==1 and x_val==0):
-        base_comm.send_command('forward')
+    # Match the vector to command
+    switcher = {
+        [128,128]: 'stop',
+        [255,0]: 'forward',
+        [0,255]: 'backward'}
 
-    elif (y_val==-1 and x_val==0):
-        base_comm.send_command('backward')
-
-    elif (x_val==-1 and y_val==0):
-        base_comm.send_command('lateral_right')
-
-    elif (x_val==1 and y_val==0):
-        base_comm.send_command('lateral_left')
-
-    else:
-        base_comm.send_command('stop')
+    func = switcher.get(joystick_vector, lambda: "Invalid command")
+    base_comm.send_command(func)
+    
 
 def main():
     global x_axis
