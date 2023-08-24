@@ -7,7 +7,7 @@ import time
 import numpy as np
 
 # Process joystick input
-def process_joystick(x_val,y_val):
+def process_joystick(x_val=128,y_val=128):
 
     x_val=round(x_val)
     y_val=round(y_val)
