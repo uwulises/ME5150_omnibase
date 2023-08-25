@@ -20,7 +20,9 @@ def process_joystick(x_val=128,y_val=128):
         (255,0): 'forward',
         (0,255): 'backward'}
 
-    func = switcher.get(joystick_vector, lambda: "Invalid command")
+    func = switcher.get(joystick_vector)
+    if func is None:
+        func = "STOP\n"
     base_comm.send_command(func)
     
 

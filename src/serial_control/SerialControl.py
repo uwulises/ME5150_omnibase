@@ -41,11 +41,12 @@ class SerialControl:
             'diagonal_back_right': '9\n',
             'diagonal_back_left': '10\n',
             'cmd_vel': 'CMDVEL' + vel + '\n',
-            'stop': 'STOP\n'
+            'stop': 'STOP\n',
         }
         # Get the function from switcher dictionary
-        func = switcher.get(command, lambda: "Invalid command")
-       
+        func = switcher.get(command)
+        if func is None:
+            func = "STOP\n"
         # Execute the function
         self.serial.write(func.encode())
 
