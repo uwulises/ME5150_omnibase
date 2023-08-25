@@ -57,6 +57,7 @@ def main():
                 y_axis = absevent.event.value
             process_joystick(x_axis,y_axis)
             print(x_axis,y_axis)
+            print(absevent.event.code)
 
 if __name__ == "__main__":
     base_comm = SerialControl()
