@@ -42,8 +42,12 @@ def process_joystick(x_val=128,y_val=128,rs_x_val=128,rs_y_val=128):
 def main():
     global x_axis
     global y_axis
+    global rs_x_axis
+    global rs_y_axis
     x_axis=0
     y_axis=0
+    rs_x_axis=0
+    rs_y_axis=0
     # Find Xbox wireless controller
     gamepad = None
     devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
@@ -70,7 +74,7 @@ def main():
                 rs_x_axis = absevent.event.value
             elif absevent.event.code == ecodes.ABS_RZ:
                 rs_y_axis = absevent.event.value
-            process_joystick(x_axis,y_axis)
+            process_joystick(x_axis,y_axis,rs_x_axis,rs_y_axis)
             print(x_axis,y_axis,rs_x_axis,rs_y_axis)
 
 if __name__ == "__main__":
