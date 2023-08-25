@@ -22,7 +22,7 @@ def process_joystick(x_val=128,y_val=128):
 
     func = switcher.get(joystick_vector)
     if func is None:
-        func = "STOP\n"
+        func = 'stop'
     base_comm.send_command(func)
     
 
