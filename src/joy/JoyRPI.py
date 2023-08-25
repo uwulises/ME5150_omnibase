@@ -17,8 +17,11 @@ def process_joystick(x_val=128,y_val=128):
     # Match the vector to command
     switcher = {
         (128,128): 'stop',
-        (255,0): 'forward',
-        (0,255): 'backward'}
+        (128,0): 'forward',
+        (128,255): 'backward',
+        (0,128): 'spin_left',
+        (255,128): 'spin_right',
+        }
 
     func = switcher.get(joystick_vector, lambda: "Invalid command")
     base_comm.send_command(func)
