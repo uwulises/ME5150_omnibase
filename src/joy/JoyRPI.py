@@ -49,6 +49,7 @@ def main():
 
     # Process gamepad input
     for event in gamepad.read_loop():
+        print(event.type)
         if event.type == ecodes.EV_ABS:
             absevent = categorize(event)
             if absevent.event.code == ecodes.ABS_X:
@@ -57,7 +58,6 @@ def main():
                 y_axis = absevent.event.value
             process_joystick(x_axis,y_axis)
             print(x_axis,y_axis)
-            print(absevent.event.code)
 
 if __name__ == "__main__":
     base_comm = SerialControl()
