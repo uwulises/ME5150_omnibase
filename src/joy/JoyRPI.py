@@ -36,7 +36,7 @@ def process_joystick(x_val=128,y_val=128,rs_x_val=128,rs_y_val=128):
     elif func_rs is None:
         func_rs = 'stop'    
     base_comm.send_command(func_ls)
-    base_comm.send_command(func_rs)
+    #base_comm.send_command(func_rs)
     
 
 def main():
@@ -63,7 +63,6 @@ def main():
 
     # Process gamepad input
     for event in gamepad.read_loop():
-        print(event.type)
         if event.type == ecodes.EV_ABS:
             absevent = categorize(event)
             if absevent.event.code == ecodes.ABS_X:
