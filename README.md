@@ -10,3 +10,8 @@ TO DO LIST
 - [ ] Improve the framerate output
 ### Control Server
 - [ ] Port all the control moves to cmd_vel standard
+
+### Xbox generic Control
+- [ ] handle the names of the controller when the batterry runs low
+- [ ] change the values output of the controller when the batterry runs low
+- [ ] Look for another library which works with generic controls
