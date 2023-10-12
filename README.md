@@ -1,6 +1,7 @@
 # ME5150_omnibase
 
 TO DO LIST
+<https://www.raspberrypi.com/documentation/computers/os.html#python-on-raspberry-pi>
 
 ### Firmware
 - [ ] Edit the cmd_vel(float vx, float vy) function, there's some errors on the rpm output
