@@ -2,7 +2,7 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from client.omnibase_robot_client import RobotClient
-import time
+import time   
 import cv2
 import numpy as np
 
