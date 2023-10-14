@@ -38,13 +38,11 @@ class RobotClient:
             print("Error connecting to the server:", str(e))
 
     def send_command(self, command):
-        try:
-            self.driver_socket.send(command.encode())
-            response = self.driver_socket.recv(1024).decode()
-            return response
-        except Exception as e:
-            print("Error sending or receiving data:", str(e))
-            return None
 
-    def close(self):
+        self.driver_socket.send(command.encode())
+        response = self.driver_socket.recv(1024).decode()
+        print(response)
+        return response
+
+    def close_driver(self):
         self.driver_socket.close()

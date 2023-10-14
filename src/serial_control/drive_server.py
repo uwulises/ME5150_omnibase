@@ -34,6 +34,7 @@ class DriveServer:
                 while True:
                     # Receive data from the client
                     data = client_socket.recv(1024).decode().strip()
+                    print(data)
                     if not data:
                         # No more data from the client
                         break
