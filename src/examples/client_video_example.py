@@ -11,11 +11,12 @@ def onlygray(frame):
   gray= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
   return gray, None
 
-
 robot = RobotClient("omni.local")
 
 robot.showVideo(process= onlygray)
 
+robot.connect_driver_socket()
+robot.send_command("forward")
 time.sleep(10)
 
-robot.closeWebRTC()
+#robot.closeWebRTC()
