@@ -1,4 +1,4 @@
-from robot import RobotClient
+from ..client.omnibase_robot_client import RobotClient
 import time
 import cv2
 import numpy as np

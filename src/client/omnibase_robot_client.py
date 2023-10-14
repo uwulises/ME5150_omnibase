@@ -1,6 +1,6 @@
 import requests
-from WebRTC import WebRTCController
-from videoShow import VideoShow
+from RTC.WebRTC import WebRTCController
+from RTC.videoShow import VideoShow
 
 
 class RobotClient:
@@ -21,7 +21,7 @@ class RobotClient:
         if response.status_code == 200:
             self.connected = True
             print(response.text)
-
+    #TODO: change to omnibase control
     def set_joints(self, q0=0, q1=0, q2=90, q3=120):
         params = {"q0": q0, "q1": q1, "q2": q2}
         url = f"{self.base_url}/set_joints"
