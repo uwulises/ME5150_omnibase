@@ -10,6 +10,7 @@ class RobotClient:
     def __init__(self, address, port=5000, portVideo=8080):
         self.address = address
         self.driver_port = port
+        self.url = f'http://{self.address}:{self.driver_port}'
         self.connected = False
         self.webRTCUser = WebRTCController(self.address)
         self.driver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -30,19 +31,13 @@ class RobotClient:
 
     def get_frame(self):
         return self.webRTCUser.getFrame()
-    
-    def connect_driver_socket(self):
+
+    def send_move_command(self,command):
         try:
-            self.driver_socket.connect((self.address, self.driver_port))
-        except Exception as e:
-            print("Error connecting to the server:", str(e))
-
-    def send_command(self, command):
-
-        self.driver_socket.send(command.encode())
-        response = self.driver_socket.recv(1024).decode()
-        print(response)
-        return response
-
-    def close_driver(self):
-        self.driver_socket.close()
+            response = requests.get(f'{self.url}/move/{command}')
+            if response.status_code == 200:
+                print(f'Successfully sent command: {command}')
+            else:
+                print(f'Failed to send command: {command}')
+        except requests.exceptions.RequestException as e:
+            print(f'Error: {e}')

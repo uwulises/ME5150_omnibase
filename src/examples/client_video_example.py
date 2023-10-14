@@ -15,9 +15,7 @@ robot = RobotClient("omni.local")
 
 #robot.showVideo(process= onlygray)
 
-robot.connect_driver_socket()
-robot.send_command('forward')
+robot.send_move_command('forward')
 time.sleep(10)
-robot.close_driver()
 
 #robot.closeWebRTC()
