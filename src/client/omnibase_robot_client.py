@@ -1,7 +1,8 @@
 import requests
-from RTC.WebRTC import WebRTCController
-from RTC.videoShow import VideoShow
-
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "/RTC"))
+from .RTC.WebRTC import WebRTCController
 
 class RobotClient:
 

@@ -4,8 +4,8 @@ from aiortc import (
     RTCConfiguration
 )
 import logging
-from videoShow import VideoShow, VideoBuffer
-from signaling import SignalingServer
+from .videoShow import VideoShow, VideoBuffer
+from .signaling import SignalingServer
 from aiortc.contrib.media import MediaStreamTrack
 from aiortc.contrib.signaling import BYE, add_signaling_arguments, create_signaling
 from av import VideoFrame

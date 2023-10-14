@@ -1,27 +1,20 @@
-from ..client.omnibase_robot_client import RobotClient
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+from client.omnibase_robot_client import RobotClient
 import time
 import cv2
 import numpy as np
 
-def onlyColor(frame):
-  # It converts the BGR color space of image to HSV color space
-  hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-      
-  # Threshold of blue in HSV space
-  lower_green = np.array([50,100,50])
-  upper_green = np.array([90,255,255])
+def onlygray(frame):
 
-  # Threshold the HSV image to get only blue colors
-  mask = cv2.inRange(hsv, lower_green, upper_green)
-
-  # Bitwise-AND mask and original image
-  output = cv2.bitwise_and(frame,frame, mask= mask)
-  return output, None
+  gray= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+  return gray, None
 
 
 robot = RobotClient("omni.local")
 
-robot.showVideo(process= onlyColor)
+robot.showVideo(process= onlygray)
 
 time.sleep(10)
 
