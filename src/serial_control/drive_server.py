@@ -1,7 +1,7 @@
 from flask import Flask, request
 from SerialControl import SerialControl
 
-app = Flask(__name)
+app = Flask(__name__)
 
 class DriveServer:
     def __init__(self):
