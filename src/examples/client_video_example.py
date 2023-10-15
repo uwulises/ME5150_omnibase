@@ -15,4 +15,5 @@ robot = RobotClient("omni.local")
 
 robot.showVideo(process= onlygray)
 time.sleep(10)
+robot.stopVideo()
 robot.closeWebRTC()
