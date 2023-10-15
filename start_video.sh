@@ -1,16 +1,11 @@
-#!/bin/bash
+# First, quit the existing screen session named "video" (if it exists)
+screen -X -S video quit
 
-# Start a screen session named "driver"
-screen -S driver
-
-# Change directory to the project
-cd ~/ME5150_omnibase
-
-# Source the virtual environment
-source robotica/bin/activate
-
-# Change directory to the source folder
-cd src/stream_server
-
-# Run the Python script
-python3 stream_rpi.py
+# Then, create a new detached screen session named "video"
+# and execute the desired commands within it
+screen -dmS video bash -c '
+  cd ~/ME5150_omnibase
+  source robotica/bin/activate
+  cd src/stream_server
+  python3 stream_rpi.py
+'
