@@ -21,10 +21,11 @@ Following recommendation of Picamera 2 manual
 - [ ] Edit the cmd_vel(float vx, float vy) function, there's some errors on the rpm output
 - [ ] Use the correct kinematic model using cmd_vel
 ### Image Server
-- [ ] Change the implementation to other WebRTC handler
+- [x] Change the implementation to aiortc WebRTC
 - [ ] Improve the framerate output
 ### Control Server
 - [ ] Port all the control moves to cmd_vel standard
+- [x] Use requests GET method for call moves
 
 ### Xbox generic Control
 - [ ] handle the names of the controller when the batterry runs low
