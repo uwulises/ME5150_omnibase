@@ -11,6 +11,8 @@ Following recommendation of Picamera 2 manual
 
 ```sudo apt install -y opencv-data```
 
+```sudo apt install screen```
+
 ### Python environment
 
 ```$ cd ME5150_omnibase ```
