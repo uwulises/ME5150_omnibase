@@ -28,6 +28,7 @@ Following recommendation of Picamera 2 manual
 ### Control Server
 - [ ] Port all the control moves to cmd_vel standard
 - [x] Use requests GET method for call moves
+- [ ] The raspicam does not work, instead we use a webcam. Maybe using a loopback can works: <https://raspberrypi.stackexchange.com/questions/19630/take-picam-image-while-motion-is-running/19897#19897>
 
 ### Xbox generic Control
 - [ ] handle the names of the controller when the batterry runs low
