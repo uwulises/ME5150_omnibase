@@ -59,6 +59,7 @@ class RemoteControl:
             pygame.init()
             joystick = pygame.joystick.Joystick(0)
             joystick.init()
+            
             while True:
                 # Valor mínimo para considerar como acción
                 action_threshold = 0.2
