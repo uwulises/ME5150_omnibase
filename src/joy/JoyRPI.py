@@ -1,6 +1,8 @@
 import evdev
 from evdev import InputDevice, categorize, ecodes
-from ..serial_control.SerialControl import SerialControl
+import sys
+sys.path.append('../')
+from serial_control.SerialControl import SerialControl
 import time 
 import numpy as np
 
