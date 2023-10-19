@@ -1,5 +1,4 @@
 #include <AFMotor.h>
-
 String inputString = "";
 bool stringComplete = false;
 int case_command = 0;
@@ -13,8 +12,6 @@ const int diagonal_front_right = 7;
 const int diagonal_front_left = 8;
 const int diagonal_back_right = 9;
 const int diagonal_back_left = 10;
-
-
 
 AF_DCMotor motor1(1); // BL
 AF_DCMotor motor2(2); // BR
