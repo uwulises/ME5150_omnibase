@@ -1,3 +1,4 @@
+#!/bin/bash
 screen -X -S driver quit
 screen -dmS driver bash -c '
   cd ~/ME5150_omnibase

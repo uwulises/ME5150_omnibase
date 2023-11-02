@@ -1,4 +1,4 @@
-screen -X -S video quit
+#!/bin/bash
 screen -dmS video bash -c '
   cd ~/ME5150_omnibase
   source robotica/bin/activate
