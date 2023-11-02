@@ -18,7 +18,7 @@ webcam = None
 def create_local_tracks():
     global relay, webcam
     if relay is None:
-        options = {"framerate": "15", "video_size": "320x240", "pixel_format": "gray"}
+        options = {"framerate": "15", "video_size": "320x240"}
         webcam = MediaPlayer("/dev/video0", format="v4l2", options=options)
         relay = MediaRelay()
     return relay.subscribe(webcam.video)
