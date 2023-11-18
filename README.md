@@ -14,7 +14,8 @@ Following recommendation of Picamera 2 manual
 ```sudo apt install screen```
 
 ### Python environment
-
+- Install via apt-get install python3-venv
+- This should starts with python 3.9.2
 ```$ cd ME5150_omnibase ```
 
 ```$ python -m venv robotica```
