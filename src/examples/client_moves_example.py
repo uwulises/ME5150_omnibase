@@ -1,13 +1,14 @@
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from client.omnibase_robot_client import RobotClient
+from client.omnibase_robot_client import RobotClient, RobotDriverClient
 import time   
 
-robot = RobotClient("omni.local")
+robot = RobotClient(address="omni.local")
+driver = RobotDriverClient(address="omni.local")
 
-robot.send_move_command('forward')
+driver.send_move_command('forward')
 time.sleep(5)
-robot.send_move_command('backward')
+driver.send_move_command('backward')
 time.sleep(5)
-robot.send_move_command('stop')
+driver.send_move_command('stop')

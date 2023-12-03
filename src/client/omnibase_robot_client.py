@@ -32,7 +32,7 @@ class RobotClient:
 
 
 
-class RobotDriverClient(RobotClient):
+class RobotDriverClient:
     def __init__(self, address="omni.local", port=5000):
         self.driver_port = port
         self.address = address
