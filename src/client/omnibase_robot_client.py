@@ -7,13 +7,11 @@ import socket
 
 class RobotClient:
 
-    def __init__(self, address, port=5000, portVideo=8080):
+    def __init__(self, address="omni.local"):
         self.address = address
-        self.driver_port = port
-        self.url = f'http://{self.address}:{self.driver_port}'
         self.connected = False
         self.webRTCUser = WebRTCController(self.address)
-        self.driver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
 
     def connectWebRTC(self):
         self.webRTCUser.connect()
@@ -31,6 +29,15 @@ class RobotClient:
 
     def get_frame(self):
         return self.webRTCUser.getFrame()
+
+
+
+class RobotDriverClient(RobotClient):
+    def __init__(self, address="omni.local", port=5000):
+        self.driver_port = port
+        self.address = address
+        self.url = f'http://{self.address}:{self.driver_port}'
+        self.driver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def send_move_command(self,command):
         try:
