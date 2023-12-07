@@ -4,7 +4,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "/RTC"))
 from .RTC.WebRTC import WebRTCController
 import socket
-
+import time
 class RobotClient:
 
     def __init__(self, address="omni.local"):
@@ -37,13 +37,16 @@ class RobotDriverClient:
         self.driver_port = port
         self.address = address
         self.url = f'http://{self.address}:{self.driver_port}'
-        self.driver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def send_move_command(self,command):
         try:
-            response = requests.get(f'{self.url}/move/{command}')
+            start_time = time.time()
+            response = requests.get(f'{self.url}/move/{command}', timeout=0.2)
             if response.status_code == 200:
                 print(f'Successfully sent command: {command}')
+                time_elapsed = time.time() - start_time
+                print(time_elapsed)
+                time_elapsed = 0
             else:
                 print(f'Failed to send command: {command}')
         except requests.exceptions.RequestException as e:

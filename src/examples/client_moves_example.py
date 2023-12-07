@@ -6,9 +6,8 @@ import time
 
 robot = RobotClient(address="omni.local")
 driver = RobotDriverClient(address="omni.local")
-
+time.sleep(1)
 driver.send_move_command('forward')
-time.sleep(5)
+driver.send_move_command('stop')
 driver.send_move_command('backward')
-time.sleep(5)
 driver.send_move_command('stop')

@@ -21,16 +21,16 @@ AF_DCMotor motor4(4); // FR
 void setup()
 {
   // softspeed();
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(1000);
   Serial.println("----");
   Serial.println("READY");
   Serial.println("----");
   delay(200);
-  motor1.setSpeed(200);
-  motor2.setSpeed(200);
-  motor3.setSpeed(200);
-  motor4.setSpeed(200);
+  motor1.setSpeed(100);
+  motor2.setSpeed(100);
+  motor3.setSpeed(100);
+  motor4.setSpeed(100);
 }
 
 void serialEvent()

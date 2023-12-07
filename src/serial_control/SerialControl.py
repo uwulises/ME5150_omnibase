@@ -16,7 +16,7 @@ class SerialControl:
     # Open the serial port
     def open_serial(self):
         try:
-            self.serial = Serial(self.port, 9600, timeout=1, write_timeout=0.2)
+            self.serial = Serial(self.port, 115200, write_timeout=0.1)
             print("The port is available")
             self.serial_port = "Open"
             time.sleep(2)
