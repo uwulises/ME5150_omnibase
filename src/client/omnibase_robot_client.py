@@ -41,12 +41,11 @@ class RobotDriverClient:
     def send_move_command(self,command):
         try:
             start_time = time.time()
-            response = requests.get(f'{self.url}/move/{command}', timeout=0.2)
+            response = requests.get(f'{self.url}/move/{command}', timeout=0.3)    
             if response.status_code == 200:
                 print(f'Successfully sent command: {command}')
                 time_elapsed = time.time() - start_time
                 print(time_elapsed)
-                time_elapsed = 0
             else:
                 print(f'Failed to send command: {command}')
         except requests.exceptions.RequestException as e:
