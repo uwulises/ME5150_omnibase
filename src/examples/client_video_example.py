@@ -14,6 +14,6 @@ def onlygray(frame):
 robot = RobotClient("omni.local")
 
 robot.showVideo(process= onlygray)
-time.sleep(300)
+time.sleep(200)
 robot.stopVideo()
 robot.closeWebRTC()

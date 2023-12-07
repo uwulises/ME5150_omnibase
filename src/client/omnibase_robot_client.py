@@ -3,7 +3,6 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "/RTC"))
 from .RTC.WebRTC import WebRTCController
-import socket
 import time
 class RobotClient:
 
@@ -11,37 +10,27 @@ class RobotClient:
         self.address = address
         self.connected = False
         self.webRTCUser = WebRTCController(self.address)
+        self.url = f'http://{self.address}:5000'
         
-
     def connectWebRTC(self):
         self.webRTCUser.connect()
 
     def closeWebRTC(self):
         self.webRTCUser.close()
         
-
     def showVideo(self, process= lambda frame : (frame, None)):
         self.webRTCUser.showVideo(process)
     
     def stopVideo(self):
         self.webRTCUser.stopVideo()
     
-
     def get_frame(self):
         return self.webRTCUser.getFrame()
-
-
-
-class RobotDriverClient:
-    def __init__(self, address="omni.local", port=5000):
-        self.driver_port = port
-        self.address = address
-        self.url = f'http://{self.address}:{self.driver_port}'
-
+    
     def send_move_command(self,command):
         try:
             start_time = time.time()
-            response = requests.get(f'{self.url}/move/{command}', timeout=0.3)    
+            response = requests.get(f'{self.url}/move/{command}', timeout=(0.05))
             if response.status_code == 200:
                 print(f'Successfully sent command: {command}')
                 time_elapsed = time.time() - start_time
