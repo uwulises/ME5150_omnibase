@@ -6,14 +6,18 @@ import time
 import cv2
 import numpy as np
 
-def onlygray(frame):
+ip = "192.168.139.21" # or "omni2.local"
 
-  gray= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-  return gray, None
-
-robot = RobotClient("omni.local")
-
-robot.showVideo(process= onlygray)
-time.sleep(200)
+robot = RobotClient(ip)
+print('Starting video...')
+robot.showVideo()
+time.sleep(3)
+print('Stopping video...')
 robot.stopVideo()
 robot.closeWebRTC()
+
+# while True:
+#   alo = robot.get_frame()
+#   cv2.imshow("alo", alo)
+#   if cv2.waitKey(1) & 0xFF == ord('q'):
+#     break

@@ -53,11 +53,11 @@ class WebRTCController():
             self.connect()
         return self.videoBuffer.getCurrentFrame()
 
-    def showVideo(self, process):
+    def showVideo(self):
         if not self.connected:
             self.connect()
         if not self.videoShow.isRunning():
-            self.videoShow.start(process)
+            self.videoShow.start()
         else:
             print("Already showing video")
     
@@ -74,7 +74,6 @@ class WebRTCController():
                 if (not self.videoBuffer.started):
                     await self.videoBuffer.start()
 
-            
         # send offer
         self.pc.addTransceiver('video', direction = 'recvonly')
         offer = await self.pc.createOffer()
@@ -97,11 +96,3 @@ class SimpleVideoTrack(MediaStreamTrack):
     async def recv(self):
         frame = await self.track.recv()
         return frame
-
-
-
-
-if __name__ == "__main__":
-    #logging.basicConfig(level=logging.DEBUG)
-    user = WebRTCController("omni.local")
-    user.start()
