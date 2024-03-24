@@ -7,26 +7,26 @@ import time
 import numpy as np
 
 # Process joystick input
-def process_joystick(x_val=128,y_val=128,rs_x_val=128,rs_y_val=128):
+def process_joystick(x_val = 128, y_val = 128, rs_x_val = 128, rs_y_val = 128):
     #round the values
-    x_val=round(x_val)
-    y_val=round(y_val)
-    rs_x_val=round(rs_x_val)
-    rs_y_val=round(rs_y_val)
+    x_val = round(x_val)
+    y_val = round(y_val)
+    rs_x_val = round(rs_x_val)
+    rs_y_val = round(rs_y_val)
     #create a vector with the joystick values
-    joystick_vector_ls=(x_val,y_val)
-    joystick_vector_rs=(rs_x_val,rs_y_val)
+    joystick_vector_ls = (x_val,y_val)
+    joystick_vector_rs = (rs_x_val,rs_y_val)
     # Match the vector to command
     switcher_ls = {
-        (128,128): 'stop',
-        (128,0): 'forward',
-        (128,255): 'backward',
-        (0,128): 'spin_left',
-        (255,128): 'spin_right',
+        (128, 128): 'stop',
+        (128, 0): 'forward',
+        (128, 255): 'backward',
+        (0, 128): 'spin_left',
+        (255, 128): 'spin_right',
         }
     # Match the vector to command
     switcher_rs = {
-        (128,128): 'stop',
+        (128, 128): 'stop',
         
         }
     func_ls = switcher_ls.get(joystick_vector_ls)
@@ -44,10 +44,10 @@ def main():
     global y_axis
     global rs_x_axis
     global rs_y_axis
-    x_axis=0
-    y_axis=0
-    rs_x_axis=0
-    rs_y_axis=0
+    x_axis = 0
+    y_axis = 0
+    rs_x_axis = 0
+    rs_y_axis = 0
     # Find Xbox wireless controller
     gamepad = None
     devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
