@@ -34,3 +34,21 @@ Following recommendation of Picamera 2 manual
 - [ ] handle the names of the controller when the batterry runs low
 - [ ] change the values output of the controller when the batterry runs low
 - [ ] Look for another library which works with generic controls
+
+### ImportError when running stream_rpi.py
+
+1. ImportError: libsrtp2.so.1: cannot open shared object file: No such file or directory
+<https://linuxhint.com/install-ffmpeg-raspberry-pi/>
+```
+sudo apt update && sudo apt upgrade -y
+sudo apt install ffmpeg -y
+```
+Ensure that ffmpeg is successfully installed, running:
+```
+ffmpeg -version
+```
+
+2. ImportError: libsrtp2.so.1: cannot open shared object file: No such file or directory
+```
+sudo apt install libnspr4 libnss3 libsrtp2-1
+```
