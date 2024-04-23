@@ -25,7 +25,7 @@ void setup() {
 
   Serial.begin(9600);
 
-
+}
 /* Set the current on a motor channel using PWM and directional logic.
  *@param pwm      PWM duty cycle ranging from -255 full reverse to 255 full forward
  *@param IN1_PIN  pin number xIN1 for the given channel
@@ -61,9 +61,8 @@ void set_motor_vel(int motor, int pwm) {
  * @param pwm      velocidad y sentido del motor, -255 to 255
  * @param duration delay in milliseconds (optional)
  */
-void spin_and_wait(int motor, int pwm, int duration=500)
-{
-  set_motor_currents(motor, pwm);
+void spin_and_wait(int motor, int pwm, int duration=500) {
+  set_motor_vel(motor, pwm);
   delay(duration);
 }
 
@@ -72,6 +71,8 @@ void loop(void)
   spin_and_wait(1, 150, 1000);
   // Motor 1 a vel -150 por 0.5 segs
   spin_and_wait(1, -150);
+  spin_and_wait(1, -200, 1000);
+  spin_and_wait(1, 0, 2000);
 
 }
 
