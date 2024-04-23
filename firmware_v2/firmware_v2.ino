@@ -1,12 +1,24 @@
+#include <Arduino.h>
+#include "Encoder.h"
+
 // Define motor pins
 #define M1_I1 4
 #define M1_I2 3
+#define M1_A 0
+#define M1_B 1
 #define M2_I1 5
 #define M2_I2 6
+#define M2_A 15
+#define M2_B 14
 #define M3_I1 10
 #define M3_I2 9
+#define M3_A 20
+#define M3_B 21
 #define M4_I1 11
 #define M4_I2 12
+#define M4_A 19
+#define M4_B 18
+
 
 const int motors[4][2] = {
   {M1_I1, M1_I2},
@@ -15,6 +27,24 @@ const int motors[4][2] = {
   {M4_I1, M4_I2}
 };
 
+
+// Global array of encoders
+Encoder encoders[] = {
+    {0, 1},  // Encoder for Motor 1
+    {15, 14},  // Encoder for Motor 2
+    {20, 21},  // Encoder for Motor 3
+    {19, 18}   // Encoder for Motor 4
+};
+
+void isrA0() {encoders[0].updateA(); }
+void isrB0() {encoders[0].updateB(); }
+void isrA1() {encoders[1].updateA(); }
+void isrB1() {encoders[1].updateB(); }
+void isrA2() {encoders[2].updateA(); }
+void isrB2() {encoders[2].updateB(); }
+void isrA3() {encoders[3].updateA(); }
+void isrB3() {encoders[3].updateB(); }
+
 void setup() {
   for (int i = 0; i < 4; i++) {
     pinMode(motors[i][0], OUTPUT);
@@ -22,8 +52,16 @@ void setup() {
     digitalWrite(motors[i][0], LOW);
     digitalWrite(motors[i][1], LOW);
   }
-
-  Serial.begin(9600);
+  attachInterrupt(digitalPinToInterrupt(encoders[0].pinA), isrA0, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoders[0].pinB), isrB0, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoders[1].pinA), isrA1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoders[1].pinB), isrB1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoders[2].pinA), isrA2, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoders[2].pinB), isrB2, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoders[3].pinA), isrA3, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoders[3].pinB), isrB3, CHANGE);
+  
+  Serial.begin(115200);
 
 }
 /* Set the current on a motor channel using PWM and directional logic.
@@ -67,12 +105,23 @@ void spin_and_wait(int motor, int pwm, int duration=500) {
 }
 
 void loop(void)
-{ // Motor 1 a vel 150 por 1seg
+{ 
   spin_and_wait(1, 150, 1000);
-  // Motor 1 a vel -150 por 0.5 segs
-  spin_and_wait(1, -150);
-  spin_and_wait(1, -200, 1000);
+  for (int i = 0; i < sizeof(encoders) / sizeof(encoders[0]); i++) {
+          Serial.print("Encoder ");
+          Serial.print(i);
+          Serial.print(" Position: ");
+          Serial.println(encoders[i].position);
+    }
+  
   spin_and_wait(1, 0, 2000);
 
+  for (int i = 0; i < sizeof(encoders) / sizeof(encoders[0]); i++) {
+        Serial.print("Encoder ");
+        Serial.print(i);
+        Serial.print(" Position: ");
+        Serial.println(encoders[i].position);
+  }
+  
 }
 
