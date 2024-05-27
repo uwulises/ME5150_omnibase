@@ -7,7 +7,10 @@
 struct Encoder {
     int pinA;
     int pinB;
+    float wheelRadius;
+    float velocity;
     volatile int position;
+    int old_position;
     int lastAState;
 
     Encoder(int a, int b);
