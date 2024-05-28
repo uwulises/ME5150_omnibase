@@ -15,6 +15,17 @@ float PIDController::compute(float feedback){
     float derivative = error - prev_error;
     float output = Kp * error + Ki * integral + Kd * derivative;
     prev_error = error;
+
+    //debug(error, integral, derivative, output);
+
+    return output;
+}
+
+void PIDController::setSetpoint(float setpointValue) {
+    setpoint = setpointValue;
+}
+
+void PIDController::debug(float error, float integral, float derivative, float output) {
     Serial.print("Error: ");
     Serial.print(error);
     Serial.print(" Integral: ");
@@ -23,9 +34,4 @@ float PIDController::compute(float feedback){
     Serial.print(derivative);
     Serial.print(" Output: ");
     Serial.println(output);
-    return output;
-}
-
-void PIDController::setSetpoint(float setpointValue) {
-    setpoint = setpointValue;
 }

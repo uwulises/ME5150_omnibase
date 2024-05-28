@@ -17,6 +17,7 @@ public:
     PIDController(float Kp = 1.0, float Ki = 0.0, float Kd = 0.0, float setpoint = 0.0); // Provide default values
     void setSetpoint(float setpointValue);
     float compute(float feedback);
+    void debug(float error, float integral, float derivative, float output);
 };
 
 #endif

@@ -48,6 +48,13 @@ volatile long motorPrevPos[] = { 0, 0, 0, 0 };
 float motorSpeed[] = { 0.0, 0.0, 0.0, 0.0 };
 float controlSpeed[sizeof(encoders)];
 
+const int encoder_resolution = 2500;  // encoder steps per revolution
+
+const float max_pwm = 255;  // PWM
+const float max_w_rads = 20;  // rads/s o 0.5 m/s
+const float max_w_encoder = max_w_rads * encoder_resolution / (2 * PI);  // encoder steps per second 
+const float enc2pwm = max_pwm / max_w_encoder; // PWM per encoder step
+
 PIDController pid_controllers[sizeof(encoders)];
 
 void isrA0() {
@@ -117,7 +124,8 @@ void set_motor_pwm(int pwm, int IN1_PIN, int IN2_PIN) {
    @param motor  motor index number
    @param pwm    velocity and direction for the motor, -255 to 255
 */
-void set_motor_vel(int motor, int pwm) {
+void set_motor_vel(int motor, int vel_enc) { // vel: steps per sec
+  int pwm = vel_enc * enc2pwm;
   set_motor_pwm(pwm, motors[motor][0], motors[motor][1]);
 
   Serial.print("Set motor ");
@@ -142,7 +150,7 @@ void set_velocity(int Vx, int Vy, int w, int pwm = 255) {
   unsigned long startTime = millis();  // Record the start time
 
   // Loop until 1 second has passed or control signals are within a tolerance
-  while (millis() - startTime < 3000 && !withinTolerance(controlSpeed)) {
+  while (millis() - startTime < 3000 ){ //&& !withinTolerance(controlSpeed)) {
     for (int i = 0; i < sizeof(encoders) / sizeof(encoders[0]); i++) {
       controlSpeed[i] = pid_controllers[i].compute(motorSpeed[i]);  // Set control signals
       set_motor_vel(i, controlSpeed[i]);                            // Change the motor speed
@@ -151,43 +159,50 @@ void set_velocity(int Vx, int Vy, int w, int pwm = 255) {
 }
 
 // Function to check if all control signals are within a tolerance
-bool withinTolerance(float signals[]) {
-  float tolerance = 0.1;  // Adjust this tolerance as needed
-  for (int i = 0; i < sizeof(encoders); i++) {
+bool withinTolerance(float signals[]){
+  const float tolerance = 3;
+  for (int i = 0; i < sizeof(encoders) / sizeof(encoders[0]); i++) {
+    Serial.print("Signal ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.println(abs(signals[i]));
+
     if (abs(signals[i]) > tolerance) {
-      return false;  // If any signal is not within tolerance, return false
+      return false;
     }
   }
-  return true;  // If all signals are within tolerance, return true
+  return true;
 }
 
 void miniomni_IK(int Vx, int Vy, int w) {
-  float w1 = (-sin(QUARTER_PI) * Vx + cos(QUARTER_PI) * Vy + R * w) * 1 / r;
-  float w2 = (-sin(3 * QUARTER_PI) * Vx + cos(3 * QUARTER_PI) * Vy + R * w) * 1 / r;
-  float w3 = (-sin(5 * QUARTER_PI) * Vx + cos(5 * QUARTER_PI) * Vy + R * w) * 1 / r;
-  float w4 = (-sin(7 * QUARTER_PI) * Vx + cos(7 * QUARTER_PI) * Vy + R * w) * 1 / r;
+  float w1 = (-sin(QUARTER_PI) * Vx + cos(QUARTER_PI) * Vy + R * w) * 1 / r; // rads/sec
+  float w2 = (-sin(3 * QUARTER_PI) * Vx + cos(3 * QUARTER_PI) * Vy + R * w) * 1 / r; // rads/sec
+  float w3 = (-sin(5 * QUARTER_PI) * Vx + cos(5 * QUARTER_PI) * Vy + R * w) * 1 / r; // rads/sec
+  float w4 = (-sin(7 * QUARTER_PI) * Vx + cos(7 * QUARTER_PI) * Vy + R * w) * 1 / r; // rads/sec
 
-  pid_controllers[0].setSetpoint(w1);
-  pid_controllers[1].setSetpoint(w2);
-  pid_controllers[2].setSetpoint(w3);
-  pid_controllers[3].setSetpoint(w4);
+  float radsToEncoderStep = 2500/(2 * PI); // 2500 encoder steps per revolution
+  pid_controllers[0].setSetpoint(w1*radsToEncoderStep); // steps per sec
+  pid_controllers[1].setSetpoint(w2*radsToEncoderStep); // steps per sec
+  pid_controllers[2].setSetpoint(w3*radsToEncoderStep); // steps per sec
+  pid_controllers[3].setSetpoint(w4*radsToEncoderStep); // steps per sec
 
   unsigned long startTime = millis();  // Record the start time
-
+  
   // Loop until 1 second has passed or control signals are within a tolerance
   while (millis() - startTime < 1000 && !withinTolerance(controlSpeed)) {
+    Serial.println("dentro del loop de miniomni_IK");
+    withinTolerance(controlSpeed);
     for (int i = 0; i < sizeof(encoders) / sizeof(encoders[0]); i++) {
       controlSpeed[i] = pid_controllers[i].compute(motorSpeed[i]);  // Set control signals
-
       set_motor_vel(i, controlSpeed[i]);                            // Change the motor speed
     }
   }
 
-  Serial.print(w1);
-  Serial.print(w2);
-  Serial.print(w3);
-  Serial.print(w4);
-  Serial.println("-------");
+  // Serial.print(w1);
+  // Serial.print(w2);
+  // Serial.print(w3);
+  // Serial.println(w4);
+  // Serial.println("-------");
 }
 
 void updateSpeed() {
@@ -212,6 +227,7 @@ void updateSpeed() {
 
 void loop(void) {
   updateSpeed();
-  miniomni_IK(0, 1, 0);
+  miniomni_IK(0, 1, 0); // en metros y rads/seg
+  //Serial.println(encoders[1].position);
   delay(500);
 }
