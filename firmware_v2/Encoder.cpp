@@ -12,7 +12,6 @@ void Encoder::updateA() {
     unsigned long startTime = micros();
     if (currentA != lastAState) {
         lastAState = currentA;
-        velocity = (((2 * PI) / 13) / ((micros() - startTime) * 1000000)) * wheelRadius;
         if (currentA == currentB) {
             position++;
         } else {

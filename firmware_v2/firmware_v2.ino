@@ -39,8 +39,14 @@ int dt = 100;  // Periodo de actualización velocidad, en milisegundos
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
 
-const float R = 0.075;  // Distancia desde el centro de robot al centro de las ruedas, en m
-const float r = 0.025;  // Radio de las ruedas, en m
+/* Parametros miniomni*/
+const int R = 75;  // Distancia desde el centro de robot al centro de las ruedas, en mm
+// const float r = 0.025;  // Radio de las ruedas, en m
+
+/* Parametros omni*/
+const int l = 75;  // Mitad de la distancia entre las ruedas delanteras y traseras, e izquierdas y derechas, en mm
+const int r = 27;  // Radio de las ruedas, en mm
+const int lxy = sqrt(2) * l;
 
 volatile long motorPos[] = { 0, 0, 0, 0 };
 volatile long motorPrevPos[] = { 0, 0, 0, 0 };
@@ -48,12 +54,15 @@ volatile long motorPrevPos[] = { 0, 0, 0, 0 };
 float motorSpeed[] = { 0.0, 0.0, 0.0, 0.0 };
 float controlSpeed[sizeof(encoders)];
 
-const int encoder_resolution = 2500;  // encoder steps per revolution
+const int encoder_resolution = 2500;                  // encoder steps per revolution
+const int rad2enc = encoder_resolution / (2 * PI);  // encoder steps per radian 397
 
-const float max_pwm = 255;  // PWM
-const float max_w_rads = 20;  // rads/s o 0.5 m/s
-const float max_w_encoder = max_w_rads * encoder_resolution / (2 * PI);  // encoder steps per second 
-const float enc2pwm = max_pwm / max_w_encoder; // PWM per encoder step
+const int max_pwm = 255;                         // PWM
+const int max_w_rads = 20;                       // rads/s o 0.5 m/s
+const int max_w_encoder = max_w_rads * rad2enc;  // encoder steps per second
+
+const float enc2pwm = max_pwm / max_w_encoder;  // PWM per encoder step
+
 
 PIDController pid_controllers[sizeof(encoders)];
 
@@ -99,7 +108,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(encoders[3].pinB), isrB3, CHANGE);
 
   for (int i = 0; i < sizeof(encoders); ++i) {
-    pid_controllers[i] = PIDController(1.0, 0.0, 0.0, 0.0);  // Adjust parameters as needed
+    pid_controllers[i] = PIDController(1, 0.5, 0.0, 0.0);  // Adjust parameters as needed
   }
 
   Serial.begin(115200);
@@ -124,14 +133,17 @@ void set_motor_pwm(int pwm, int IN1_PIN, int IN2_PIN) {
    @param motor  motor index number
    @param pwm    velocity and direction for the motor, -255 to 255
 */
-void set_motor_vel(int motor, int vel_enc) { // vel: steps per sec
-  int pwm = vel_enc * enc2pwm;
-  set_motor_pwm(pwm, motors[motor][0], motors[motor][1]);
+void set_motor_vel(int motor, int vel_enc) {  // vel: steps per sec
+  Serial.println("Vel enc_: ");
+  Serial.print(vel_enc);
+  Serial.print("\t Enc2pwm: ");
+  Serial.print(enc2pwm);
 
-  Serial.print("Set motor ");
-  Serial.print(motor);
-  Serial.print(" PWM = ");
-  Serial.println(pwm);
+  int pwm = vel_enc * enc2pwm;
+  Serial.print("\t PWM: ");
+  Serial.print(pwm);
+
+  set_motor_pwm(pwm, motors[motor][0], motors[motor][1]);
 }
 
 /* Set linear and angular velocity for the robot.
@@ -139,18 +151,31 @@ void set_motor_vel(int motor, int vel_enc) { // vel: steps per sec
    @param linealVelocityY   linear velocity on the y axis, in m/s
    @param angularVelocity   angular velocity, not sure of the measurement for this one
 */
-void set_velocity(int Vx, int Vy, int w, int pwm = 255) {
+void omni_IK(float Vx, float Vy, float w) {
 
-  // Calculations for the target values:
-  pid_controllers[0].setSetpoint(Vx + Vy + r * w);
-  pid_controllers[1].setSetpoint(Vx - Vy - r * w);
-  pid_controllers[2].setSetpoint(Vx - Vy + r * w);
-  pid_controllers[3].setSetpoint(Vx + Vy - r * w);
+  float w1 = (Vx + Vy + lxy * w) * 1 / r;
+  float w2 = (Vx - Vy - lxy * w) * 1 / r;
+  float w3 = (Vx - Vy + lxy * w) * 1 / r;
+  float w4 = (Vx + Vy - lxy * w) * 1 / r;
+
+  Serial.print("w1: ");
+  Serial.print(w1);
+  Serial.print("\tw2: ");
+  Serial.print(w2);
+  Serial.print("\tw3: ");
+  Serial.print(w3);
+  Serial.print("\tw4: ");
+  Serial.println(w4);
+
+  pid_controllers[0].setSetpoint(w1 * rad2enc);
+  pid_controllers[1].setSetpoint(-w2 * rad2enc);
+  pid_controllers[2].setSetpoint(w3 * rad2enc);
+  pid_controllers[3].setSetpoint(-w4 * rad2enc);
 
   unsigned long startTime = millis();  // Record the start time
 
   // Loop until 1 second has passed or control signals are within a tolerance
-  while (millis() - startTime < 3000 ){ //&& !withinTolerance(controlSpeed)) {
+  while (millis() - startTime < 3000) {  //&& !withinTolerance(controlSpeed)) {
     for (int i = 0; i < sizeof(encoders) / sizeof(encoders[0]); i++) {
       controlSpeed[i] = pid_controllers[i].compute(motorSpeed[i]);  // Set control signals
       set_motor_vel(i, controlSpeed[i]);                            // Change the motor speed
@@ -159,14 +184,9 @@ void set_velocity(int Vx, int Vy, int w, int pwm = 255) {
 }
 
 // Function to check if all control signals are within a tolerance
-bool withinTolerance(float signals[]){
+bool withinTolerance(float signals[]) {
   const float tolerance = 3;
   for (int i = 0; i < sizeof(encoders) / sizeof(encoders[0]); i++) {
-    Serial.print("Signal ");
-    Serial.print(i);
-    Serial.print(": ");
-    Serial.println(abs(signals[i]));
-
     if (abs(signals[i]) > tolerance) {
       return false;
     }
@@ -174,20 +194,19 @@ bool withinTolerance(float signals[]){
   return true;
 }
 
-void miniomni_IK(int Vx, int Vy, int w) {
-  float w1 = (-sin(QUARTER_PI) * Vx + cos(QUARTER_PI) * Vy + R * w) * 1 / r; // rads/sec
-  float w2 = (-sin(3 * QUARTER_PI) * Vx + cos(3 * QUARTER_PI) * Vy + R * w) * 1 / r; // rads/sec
-  float w3 = (-sin(5 * QUARTER_PI) * Vx + cos(5 * QUARTER_PI) * Vy + R * w) * 1 / r; // rads/sec
-  float w4 = (-sin(7 * QUARTER_PI) * Vx + cos(7 * QUARTER_PI) * Vy + R * w) * 1 / r; // rads/sec
+void miniomni_IK(float Vx, float Vy, float w) {
+  float w1 = (-sin(QUARTER_PI) * Vx + cos(QUARTER_PI) * Vy + R * w) * 1 / r;          // rads/sec
+  float w2 = (-sin(3 * QUARTER_PI) * Vx + cos(3 * QUARTER_PI) * Vy + R * w) * 1 / r;  // rads/sec
+  float w3 = (-sin(5 * QUARTER_PI) * Vx + cos(5 * QUARTER_PI) * Vy + R * w) * 1 / r;  // rads/sec
+  float w4 = (-sin(7 * QUARTER_PI) * Vx + cos(7 * QUARTER_PI) * Vy + R * w) * 1 / r;  // rads/sec
 
-  float radsToEncoderStep = 2500/(2 * PI); // 2500 encoder steps per revolution
-  pid_controllers[0].setSetpoint(w1*radsToEncoderStep); // steps per sec
-  pid_controllers[1].setSetpoint(w2*radsToEncoderStep); // steps per sec
-  pid_controllers[2].setSetpoint(w3*radsToEncoderStep); // steps per sec
-  pid_controllers[3].setSetpoint(w4*radsToEncoderStep); // steps per sec
+  pid_controllers[0].setSetpoint(w1 * rad2enc);  // steps per sec
+  pid_controllers[1].setSetpoint(w2 * rad2enc);  // steps per sec
+  pid_controllers[2].setSetpoint(w3 * rad2enc);  // steps per sec
+  pid_controllers[3].setSetpoint(w4 * rad2enc);  // steps per sec
 
   unsigned long startTime = millis();  // Record the start time
-  
+
   // Loop until 1 second has passed or control signals are within a tolerance
   while (millis() - startTime < 1000 && !withinTolerance(controlSpeed)) {
     Serial.println("dentro del loop de miniomni_IK");
@@ -227,7 +246,19 @@ void updateSpeed() {
 
 void loop(void) {
   updateSpeed();
-  miniomni_IK(0, 1, 0); // en metros y rads/seg
+  // Mostrar vel de motores
+  // Serial.print("Motor 1: ");
+  // Serial.println(motorSpeed[0]);
+  // Serial.print("Motor 2: ");
+  // Serial.println(motorSpeed[1]);
+  // Serial.print("Motor 3: ");
+  // Serial.println(motorSpeed[2]);
+  // Serial.print("Motor 4: ");
+  // Serial.println(motorSpeed[3]);
+
+
+  // miniomni_IK(0, 1, 0); // en metros y rads/seg, Vy hacia adelante
   //Serial.println(encoders[1].position);
-  delay(500);
+  omni_IK(0.1, 0, 0);  // en metros y rads/seg Vx hacia adelante
+  delay(50);
 }
