@@ -133,34 +133,7 @@ void set_motor_vel(int motor, int vel_enc) {  // vel: steps per sec
   set_motor_pwm(pwm, motors[motor][0], motors[motor][1]);
 }
 
-/* Set linear and angular velocity for the robot.
-   @param linealVelocityX   linear velocity on the x axis, in m/s
-   @param linealVelocityY   linear velocity on the y axis, in m/s
-   @param angularVelocity   angular velocity, not sure of the measurement for this one
-*/
-void miniomni_IK(float Vx, float Vy, float w) {
-  float w1 = (-sin(QUARTER_PI) * Vx + cos(QUARTER_PI) * Vy + (R/1000) * w) * 1 / (r/1000) ;          // rads/sec
-  float w2 = (-sin(3 * QUARTER_PI) * Vx + cos(3 * QUARTER_PI) * Vy + (R/1000) * w) * 1 / (r/1000) ;  // rads/sec
-  float w3 = (-sin(5 * QUARTER_PI) * Vx + cos(5 * QUARTER_PI) * Vy + (R/1000) * w) * 1 / (r/1000) ;  // rads/sec
-  float w4 = (-sin(7 * QUARTER_PI) * Vx + cos(7 * QUARTER_PI) * Vy + (R/1000) * w) * 1 / (r/1000) ;  // rads/sec
 
-  pid_controllers[0].setSetpoint(w1 * rad2enc);  // steps per sec
-  pid_controllers[1].setSetpoint(w2 * rad2enc);  // steps per sec
-  pid_controllers[2].setSetpoint(w3 * rad2enc);  // steps per sec
-  pid_controllers[3].setSetpoint(w4 * rad2enc);  // steps per sec
-
-  unsigned long startTime = millis();  // Record the start time
-
-  // Loop until 1 second has passed or control signals are within a tolerance
-  while (millis() - startTime < 1000 && !withinTolerance(controlSpeed)) {
-    Serial.println("dentro del loop de miniomni_IK");
-    withinTolerance(controlSpeed);
-    for (int i = 0; i < sizeof(encoders) / sizeof(encoders[0]); i++) {
-      controlSpeed[i] = pid_controllers[i].compute(motorSpeed[i]);  // Set control signals
-      set_motor_vel(i, controlSpeed[i]);                            // Change the motor speed
-    }
-  }
-}
 
 void updateSpeed() {
   currentMillis = millis();
