@@ -3,7 +3,7 @@ import serial
 
 class SendVelocities:
     # Initialize the serial port
-    def __init__(self, port="/dev/ttyUSB0"):
+    def __init__(self, port="/dev/serial0"):
         self.port = port
         self.serial = None
         self.open_serial()
@@ -35,7 +35,8 @@ class SendVelocities:
 
         msg = ''
         for vels in velocities:
-            msg += f"{p[0]},{p[1]},{p[2]}\n"
+
+            msg += f"{vels[0]},{vels[1]},{vels[2]}\n"
         
         self.serial.write(msg.encode())
         print("Path sent")
