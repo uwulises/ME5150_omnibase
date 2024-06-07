@@ -35,12 +35,24 @@ class SendVelocities:
 
         msg = ''
         for vels in velocities:
-
-            msg += f"{vels[0]},{vels[1]},{vels[2]}\n"
-        
+            
+            msg += self.format_vel(vels)
+        print('mensaje a envair', msg)
         self.serial.write(msg.encode())
         print("Path sent")
-        time.sleep(1)
+
+    def format_vel(self, vels):
+        # solo 3 decimales
+        vx = "{:.3f}".format(vels[0])
+        vy = "{:.3f}".format(vels[1])
+        w = "{:.3f}".format(vels[2])
+        return f"{vx},{vy},{w};"
+
+    def read(self):
+        data = self.serial.readline()
+        decoded_data = data.decode()
+        print(decoded_data)
+
 
     def close(self):
         self.serial.close()

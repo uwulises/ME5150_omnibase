@@ -120,6 +120,9 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(encoders[3].pinB), isrB3, CHANGE);
 
   Serial.begin(115200);
+  while (!Serial) {
+    ; // Esperar a que se inicie la conexión serial
+  }
 }
 
 void omni_IK(float Vx, float Vy, float w) {
@@ -212,7 +215,16 @@ void updateSpeed() {
   }
 }
 
+void receiveData() {
+  if (Serial.available() > 0) {
+    String message = Serial.readStringUntil('\n');
+    Serial.print("Recibido: ");
+    Serial.println(message);
+  }
+}
+
 void loop(void) {
+  
   updateSpeed();
   omni_IK(-0.4, 0, 0);  // en metros y rads/seg, Vx hacia adelante
   apply_PID();
