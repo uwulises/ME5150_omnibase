@@ -6,7 +6,7 @@ class GetTrajectory:
         self.q0 = np.array([0, 0, 0])
         assert len(qf) == len(self.q0), f"q0 and qf must have the same length: {len(self.q0)}"
         self.qf = np.array(qf)
-        self.T_max = T_max
+        self.T_max = int(T_max)
         self.num_points = num_points
         self.dt = dt
         self.dof = len(qf)

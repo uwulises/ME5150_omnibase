@@ -8,7 +8,7 @@ struct Encoder {
     int pinA;
     int pinB;
     volatile int position;
-    int lastAState;
+    int lastA_state;
 
     Encoder(int a, int b);
     void updateA();
