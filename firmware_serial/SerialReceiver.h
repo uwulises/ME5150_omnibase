@@ -6,8 +6,8 @@
 
 class SerialReceiver {
     private:
-        String msg;
-        String action;
+        String msg = "";
+        String action = "";
 
     public:
         SerialReceiver();

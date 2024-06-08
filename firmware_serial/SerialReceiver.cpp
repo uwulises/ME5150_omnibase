@@ -3,9 +3,7 @@
 #include "SerialReceiver.h"
 
 SerialReceiver::SerialReceiver() {
-    msg = "";
-    action = "";
-
+    
 }
 
 SerialReceiver::processMsg() {
