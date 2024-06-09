@@ -50,7 +50,7 @@ int dt_pid = 200;  // Periodo de actualización PID, en milisegundos
 unsigned long t1_mot = 0;
 unsigned long t1_pid = 0;
 
-/* Parametros omni*/
+/* Parametros omni */
 const int l = 75;  // Mitad de la distancia entre las ruedas delanteras y traseras, e izquierdas y derechas, en mm
 const int r = 27;  // Radio de las ruedas, en mm
 const int lxy = sqrt(2) * l;
@@ -135,28 +135,12 @@ void omni_IK(float Vx, float Vy, float w) {
   float w2 = -(Vx - Vy - (lxy / 1000.0) * w) * 1000.0 / r;  // rads/sec
   float w3 = (Vx - Vy + (lxy / 1000.0) * w) * 1000.0 / r;   // rads/sec
   float w4 = -(Vx + Vy - (lxy / 1000.0) * w) * 1000.0 / r;  // rads/sec
-  // Serial.print("w1:");
-  // Serial.print(w1);
-  // Serial.print("\t w2:");
-  // Serial.print(w2);
-  // Serial.print("\t w3:");
-  // Serial.print(w3);
-  // Serial.print("\t w4:");
-  // Serial.println(w4);
 
   pid_controllers[0].setSetpoint(w1 * rad2enc);  // steps per sec
   pid_controllers[1].setSetpoint(w2 * rad2enc);  // steps per sec
   pid_controllers[2].setSetpoint(w3 * rad2enc);  // steps per sec
   pid_controllers[3].setSetpoint(w4 * rad2enc);  // steps per sec
 
-  // Serial.print("w1:");
-  // Serial.print(w1*rad2enc);
-  // Serial.print("\t w2:");
-  // Serial.print(w2*rad2enc);
-  // Serial.print("\t w3:");
-  // Serial.print(w3*rad2enc);
-  // Serial.print("\t w4:");
-  // Serial.println(w4*rad2enc);
 }
 
 bool withinTolerance(float signals[]) {

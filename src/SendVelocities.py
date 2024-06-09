@@ -37,7 +37,6 @@ class SendVelocities:
         for vels in velocities:
             
             msg += self.format_vel(vels)
-        print('mensaje a envair', msg)
         self.serial.write(msg.encode())
         print("Path sent")
 
@@ -51,7 +50,7 @@ class SendVelocities:
     def read(self):
         data = self.serial.readline()
         decoded_data = data.decode()
-        print(decoded_data)
+        return decoded_data
 
 
     def close(self):
