@@ -6,7 +6,7 @@ def main():
     dt = 0.5
     T_max = 10
     qf = [0.5, 0.2, 0.1]
-    sv = SendVelocities.SendVelocities(port = "COM11")
+    sv = SendVelocities.SendVelocities(port = "/dev/serial0")
 
     gt = GetTrajectory.GetTrajectory(qf, T_max, dt=dt)
     _, velocities_dt = gt.get_trajectory()
