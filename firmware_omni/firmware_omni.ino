@@ -1,34 +1,12 @@
 #include <Arduino.h>
 #include "Encoder.h"
 #include "PIDController.h"
-
+#include "parameters.h"
 
 /* TODO:
 - Detectar cuando el encoder no está midiendo bien -> 
       Si se le entrega una vel por x tiempo, aproximar cuando debería ser (orden de magnitud) y alertar.
 */
-
-#define QUARTER_PI 0.7853981633974483
-
-#define M1_I1 5
-#define M1_I2 6
-#define M1_A 0
-#define M1_B 1
-
-#define M2_I1 4
-#define M2_I2 3
-#define M2_A 15
-#define M2_B 14
-
-#define M3_I1 10
-#define M3_I2 9
-#define M3_A 20
-#define M3_B 21
-
-#define M4_I1 11
-#define M4_I2 12
-#define M4_A 19
-#define M4_B 18
 
 const int NUM_ENCODERS = 4;
 const int motors[NUM_ENCODERS][2] = {
@@ -199,26 +177,10 @@ void updateSpeed() {
   }
 }
 
-void receiveData() {
-  if (Serial.available() > 0) {
-    String message = Serial.readStringUntil('\n');
-    Serial.print("Recibido: ");
-    Serial.println(message);
-  }
-}
 
 void loop(void) {
   
   updateSpeed();
   omni_IK(-0.4, 0, 0);  // en metros y rads/seg, Vx hacia adelante
   apply_PID();
-  // Mostrar vel real
-  // Serial.print("M1: ");
-  // Serial.print(motorSpeed[0]);
-  // Serial.print("\tM2: ");
-  // Serial.print(motorSpeed[1]);
-  // Serial.print("\tM3: ");
-  // Serial.print(motorSpeed[2]);
-  // Serial.print("\tM4: ");
-  // Serial.println(motorSpeed[3]);
 }

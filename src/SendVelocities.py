@@ -17,14 +17,15 @@ class SendVelocities:
                 parity = serial.PARITY_NONE,
                 stopbits = serial.STOPBITS_ONE,
                 bytesize = serial.EIGHTBITS,
-                timeout = 1
+                timeout = 2
             )
             print("The port is available")
             time.sleep(2)
-        except serial.serialutil.SerialException:
-            print("The port is at use")
-            self.serial.close()
-            self.serial.open()
+        except serial.serialutil.SerialException as e:
+            print(f"Failed to open serial port: {e}")
+            if self.serial:
+                self.serial.close()
+            raise
         
         
     def send_velocities(self, velocities: list):
@@ -35,26 +36,39 @@ class SendVelocities:
 
         msg = ''
         for vels in velocities:
-            
             msg += self.format_vel(vels)
         self.serial.write(msg.encode())
         print("Path sent")
 
+    def send_dt(self, dt):
+        if self.serial is None:
+            print('Serial port is not open')
+            return
+        msg = f"{dt}"
+        self.serial.write(msg.encode())
+        print("dt sent")
+
     def format_vel(self, vels):
         # solo 3 decimales
-        vx = "{:.3f}".format(vels[0])
-        vy = "{:.3f}".format(vels[1])
-        w = "{:.3f}".format(vels[2])
+        vx = "{:.4f}".format(vels[0])
+        vy = "{:.4f}".format(vels[1])
+        w = "{:.4f}".format(vels[2])
         return f"{vx},{vy},{w};"
 
     def read(self):
         data = self.serial.readline()
-        decoded_data = data.decode()
+        decoded_data = data.decode().strip()
+        return decoded_data
+    
+    def read_all(self):
+        data = self.serial.read_all()
+        decoded_data = data.decode().strip()
         return decoded_data
 
-
     def close(self):
-        self.serial.close()
+        if self.serial:
+            self.serial.close()
+            print("Serial port closed")
 
 def main():
     velocities = np.random.rand(10, 3)

@@ -6,18 +6,21 @@
 class SerialReceiver {
 private:
   String action = "";
-  String msg = "";
+  String receive_msg = "";
 
 public:
   SerialReceiver();
   float Vx = 0.0;
   float Vy = 0.0;
   float w = 0.0;
-  void sendMsg();
+  void sendMsg(const String &msg = "1");
+  void setMsg(const String &msg = "");
   void receiveData();
   void processMsg();
-  void getAction();
+  void splitAction();
+  void clearSerialBuffer();
   String getMsg();
+  String getAction();
 };
 
 #endif
