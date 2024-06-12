@@ -98,22 +98,29 @@ void setup() {
 
 void loop() {
 
+  // Si se corta la comunicación serie, detener los motores
   if (!Serial) {
     state = 0;
+  } else {  // Si hay comunicación serie, actualizar la velocidad de los motores
+    updateSpeed();
   }
 
   switch (state) {
+
+    // Estado 0: Si no hay comunicación serie, detener los motores
     case 0:
       if (!Serial) {
-        state = 0;  // Mantener en estado 0 si no hay comunicación serie
-      } else {
+        stop_motors();        // Detener los motores
+        state = 0;            // Mantener en estado 0 si no hay comunicación serie
+      } else {                // Si hay comunicación serie, pasar al estado 1
         dt = 0;
         msg = "";
         state = 1;  // Pasar al estado 1 si hay comunicación serie
       }
       break;
 
-    case 1:  // Obtener dt del monitor serie
+    // Estado 1: Obtener dt del monitor serie
+    case 1: 
       if (millis() - last_ready >= dt_ready) {
         last_ready = millis();
         serialR.sendMsg("waiting dt");
@@ -129,11 +136,12 @@ void loop() {
       }
       break;
 
-    case 2:  // Enviar "ready" al monitor serie cada dt_ready ms
-      if (millis() - last_ready >= dt_ready) {
+    // Estado 2: Recibir trayectoria a traves del monitor serie
+    case 2: 
+      if (millis() - last_ready >= dt_ready) {  // Si ha pasado dt_ready ms
         last_ready = millis();
-        serialR.sendMsg("waiting data");
-        serialR.clearSerialBuffer();
+        serialR.sendMsg("waiting data");        // Enviar "waiting data"
+        serialR.clearSerialBuffer();            // y limpiar el buffer serie
       }
       serialR.receiveData();
       msg = serialR.getMsg();
@@ -142,44 +150,41 @@ void loop() {
       }
       break;
 
-    case 3:
+    // Estado 3: Obtener la siguiente acción para el robot
+    case 3: 
+
       // Procesar el mensaje del monitor serie
       serialR.processMsg();
       serialR.splitAction();
+      last_ready = millis();
 
       // Pasar al estado 4 después de procesar el mensaje
       state = 4;
       break;
 
-    case 4:  // Mover el robot
-      // Serial.print("Vx: ");
-      // Serial.print(serialR.Vx);
-      // Serial.print(" Vy: ");
-      // Serial.print(serialR.Vy);
-      // Serial.print(" w: ");
-      // Serial.println(serialR.w);
-      updateSpeed();
-      Serial.println(millis() - last_ready);
-      Serial.println(dt*1000);
-      if (millis() - last_ready <= dt*1000){
-        last_ready = millis();
-        Serial.println("Updating speed");
+    // Estado 4: Mover el robot
+    case 4: 
+
+      // Si ha pasado menos que dt
+      if (millis() - last_ready < dt * 1000) {
         omni_IK(serialR.Vx, serialR.Vy, serialR.w);  // en metros y rads/seg, Vx hacia adelante
         apply_PID();
         break;
       }
-    
+      
       msg = serialR.getMsg();
+
       if (msg == "") {
         state = 2;  // Volver al estado 2 si no hay mensaje
         serialR.sendMsg("Traj");
+
       } else {
         state = 3;  // Volver al estado 3 si hay mensaje
       }
       break;
 
     default:
-      state = 0;  // Asegurar que el estado siempre vuelva a un estado conocido
+      state = 0;
       break;
   }
 }
@@ -200,7 +205,6 @@ void omni_IK(float Vx, float Vy, float w) {
   pid_controllers[1].setSetpoint(w2 * rad2enc);  // steps per sec
   pid_controllers[2].setSetpoint(w3 * rad2enc);  // steps per sec
   pid_controllers[3].setSetpoint(w4 * rad2enc);  // steps per sec
-
 }
 
 bool withinTolerance(float signals[]) {
@@ -241,6 +245,13 @@ void set_motor_vel(int motor, int pwm) {  // vel: steps per sec
   }
 }
 
+void stop_motors() {
+  /* Set all motors to stop.
+  */
+  for (int i = 0; i < NUM_ENCODERS; i++) {
+    set_motor_vel(i, 0);
+  }
+}
 
 void updateSpeed() {
   if (millis() - t1_mot >= dt_vel) {
@@ -258,4 +269,3 @@ void updateSpeed() {
     }
   }
 }
-

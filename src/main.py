@@ -4,7 +4,7 @@ import numpy as np
 import time
 
 def main():
-    dt = 2.0
+    dt = 0.5
     T_max = 10
     qf = [0.5, 0.2, 0.1]
     sv = SendVelocities.SendVelocities(port = "COM11")
