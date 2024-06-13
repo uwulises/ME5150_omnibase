@@ -59,6 +59,9 @@ class SendVelocities:
         data = self.serial.readline()
         decoded_data = data.decode().strip()
         return decoded_data
+
+    def send(self, msg):
+        self.serial.write(msg.encode())
     
     def read_all(self):
         data = self.serial.read_all()
