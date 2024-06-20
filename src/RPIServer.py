@@ -1,11 +1,14 @@
 import socket
 
+import socket
+
 class RPIServer:
     def __init__(self, server_ip, server_port, image_path):
         self.server_ip = server_ip
         self.server_port = server_port
         self.image_path = image_path
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Reuse address option
     
     def start(self):
         self.socket.bind((self.server_ip, self.server_port))
@@ -26,9 +29,7 @@ class RPIServer:
         print("Image sent to client")
     
     def receive_text(self, client_socket):
-        text = client_socket.recv(1024).decode('utf-8')
-        print("Received text message:", text)
-        return text
+        return client_socket.recv(1024).decode('utf-8')
     
     def send_image(self, client_socket):
         with open(self.image_path, 'rb') as f:
