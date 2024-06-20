@@ -27,7 +27,7 @@ class PCClient:
 
 def main():
     # Example usage
-    server_ip = 'omni1.local'  # Replace with the IP address of your RPI
+    server_ip = '192.168.1.23'  # Replace with the IP address of your RPI
     server_port = 12345
     text_message = 'Hello Raspberry Pi'
     image_save_path = 'received_image.jpg'

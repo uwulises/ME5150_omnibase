@@ -1,6 +1,7 @@
 import socket
-
-import socket
+import picamera
+import io
+import time
 
 class RPIServer:
     def __init__(self, server_ip, server_port, image_path):
@@ -9,6 +10,8 @@ class RPIServer:
         self.image_path = image_path
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Reuse address option
+
+        self.last_time = time.time()
     
     def start(self):
         self.socket.bind((self.server_ip, self.server_port))
@@ -25,11 +28,13 @@ class RPIServer:
     def handle_client(self, client_socket):
         text_message = self.receive_text(client_socket)
         print("Received text message:", text_message)
-        self.send_image(client_socket)
-        print("Image sent to client")
+        # if time.time() - self.last_time > 5:
+        #     self.send_image(client_socket)
+        # print("Image sent to client")
     
     def receive_text(self, client_socket):
-        return client_socket.recv(1024).decode('utf-8')
+        text = client_socket.recv(1024).decode('utf-8')
+        return text
     
     def send_image(self, client_socket):
         with open(self.image_path, 'rb') as f:
@@ -45,14 +50,11 @@ class RPIServer:
 def main():
     # Example usage
     server_ip = '0.0.0.0'  # Bind to all interfaces
-    server_port = 22
+    server_port = 12345
     image_path = 'path_to_image.jpg'  # Replace with the path to your image
 
     server = RPIServer(server_ip, server_port, image_path)
     server.start()
-    while True:
-        server.receive_text()
-
 
 if __name__ == '__main__':
     main()
