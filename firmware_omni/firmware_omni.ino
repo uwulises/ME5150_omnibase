@@ -1,13 +1,12 @@
 #include <Arduino.h>
+
 #include "Encoder.h"
 #include "PIDController.h"
+#include "SerialReceiver.h"
 #include "parameters.h"
 
-/* TODO:
-- Detectar cuando el encoder no está midiendo bien -> 
-      Si se le entrega una vel por x tiempo, aproximar cuando debería ser (orden de magnitud) y alertar.
-*/
 
+// Variables
 const int NUM_ENCODERS = 4;
 const int motors[NUM_ENCODERS][2] = {
   { M1_I1, M1_I2 },
@@ -23,31 +22,11 @@ Encoder encoders[] = {
   { M4_A, M4_B }
 };
 
-int dt = 100;      // Periodo de actualización velocidad, en milisegundos
-int dt_pid = 200;  // Periodo de actualización PID, en milisegundos
-unsigned long t1_mot = 0;
-unsigned long t1_pid = 0;
-
-/* Parametros omni */
-const int l = 75;  // Mitad de la distancia entre las ruedas delanteras y traseras, e izquierdas y derechas, en mm
-const int r = 27;  // Radio de las ruedas, en mm
-const int lxy = sqrt(2) * l;
-
 volatile long motorPos[] = { 0, 0, 0, 0 };
 volatile long motorPrevPos[] = { 0, 0, 0, 0 };
 
 float motorSpeed[] = { 0.0, 0.0, 0.0, 0.0 };
 float controlSpeed[NUM_ENCODERS];
-
-const int encoder_resolution = 2500;                // encoder steps per revolution
-const int rad2enc = encoder_resolution / (2 * PI);  // encoder steps per radian 397
-
-const int max_pwm = 255;                         // PWM
-const int max_w_rads = 20;                       // rads/s o 0.5 m/s
-const int max_w_encoder = max_w_rads * rad2enc;  // encoder steps per second
-const int min_w_encoder = -max_w_encoder;        // encoder steps per second
-
-// const float enc2pwm = max_pwm / float(max_w_encoder);  // PWM per encoder step
 
 PIDController pid_controllers[NUM_ENCODERS] = {
   PIDController(0.01, 0.0001, 0.0),
@@ -56,6 +35,7 @@ PIDController pid_controllers[NUM_ENCODERS] = {
   PIDController(0.01, 0.0001, 0.0),
 };
 
+// IGNORE
 void isrA0() {
   encoders[0].updateA();
 }
@@ -81,6 +61,17 @@ void isrB3() {
   encoders[3].updateB();
 }
 
+
+// Variables seriales
+
+SerialReceiver serialR;
+float dt = 0;
+String msg = "";
+
+long unsigned int dt_ready = 3000;
+long unsigned int last_ready = 0;
+int state = 0;
+
 void setup() {
   for (int i = 0; i < 4; i++) {
     pinMode(motors[i][0], OUTPUT);
@@ -99,9 +90,105 @@ void setup() {
 
   Serial.begin(115200);
   while (!Serial) {
-    ; // Esperar a que se inicie la conexión serial
+    ;  // Esperar a que el puerto serie esté listo
+  }
+  delay(3000);  // Espera inicial para dar tiempo a la conexión serie
+  state = 1;    // Inicia en el estado 1
+}
+
+void loop() {
+
+  // Si se corta la comunicación serie, detener los motores
+  if (!Serial) {
+    state = 0;
+  } else {  // Si hay comunicación serie, actualizar la velocidad de los motores
+    updateSpeed();
+  }
+
+  switch (state) {
+
+    // Estado 0: Si no hay comunicación serie, detener los motores
+    case 0:
+      if (!Serial) {
+        stop_motors();        // Detener los motores
+        state = 0;            // Mantener en estado 0 si no hay comunicación serie
+      } else {                // Si hay comunicación serie, pasar al estado 1
+        dt = 0;
+        msg = "";
+        state = 1;  // Pasar al estado 1 si hay comunicación serie
+      }
+      break;
+
+    // Estado 1: Obtener dt del monitor serie
+    case 1: 
+      if (millis() - last_ready >= dt_ready) {
+        last_ready = millis();
+        serialR.sendMsg("waiting dt");
+        serialR.clearSerialBuffer();
+      }
+      serialR.receiveData();
+      dt = serialR.getMsg().toFloat();
+
+      if (dt != 0) {
+        serialR.sendMsg("Dt received");
+        state = 2;  // Pasar al estado 2 después de enviar "Dt"
+        serialR.setMsg();
+      }
+      break;
+
+    // Estado 2: Recibir trayectoria a traves del monitor serie
+    case 2: 
+      if (millis() - last_ready >= dt_ready) {  // Si ha pasado dt_ready ms
+        last_ready = millis();
+        serialR.sendMsg("waiting data");        // Enviar "waiting data"
+        serialR.clearSerialBuffer();            // y limpiar el buffer serie
+      }
+      serialR.receiveData();
+      msg = serialR.getMsg();
+      if (msg != "") {
+        state = 3;  // Pasar al estado 3 si se recibe algún mensaje
+      }
+      break;
+
+    // Estado 3: Obtener la siguiente acción para el robot
+    case 3: 
+
+      // Procesar el mensaje del monitor serie
+      serialR.processMsg();
+      serialR.splitAction();
+      last_ready = millis();
+
+      // Pasar al estado 4 después de procesar el mensaje
+      state = 4;
+      break;
+
+    // Estado 4: Mover el robot
+    case 4: 
+
+      // Si ha pasado menos que dt
+      if (millis() - last_ready < dt * 1000) {
+        omni_IK(serialR.Vx, serialR.Vy, serialR.w);  // en metros y rads/seg, Vx hacia adelante
+        apply_PID();
+        break;
+      }
+      
+      msg = serialR.getMsg();
+
+      if (msg == "") {
+        state = 2;  // Volver al estado 2 si no hay mensaje
+        serialR.sendMsg("Traj");
+
+      } else {
+        state = 3;  // Volver al estado 3 si hay mensaje
+      }
+      break;
+
+    default:
+      state = 0;
+      break;
   }
 }
+
 
 void omni_IK(float Vx, float Vy, float w) {
   /* Set linear and angular velocity for the robot.
@@ -118,7 +205,6 @@ void omni_IK(float Vx, float Vy, float w) {
   pid_controllers[1].setSetpoint(w2 * rad2enc);  // steps per sec
   pid_controllers[2].setSetpoint(w3 * rad2enc);  // steps per sec
   pid_controllers[3].setSetpoint(w4 * rad2enc);  // steps per sec
-
 }
 
 bool withinTolerance(float signals[]) {
@@ -159,14 +245,21 @@ void set_motor_vel(int motor, int pwm) {  // vel: steps per sec
   }
 }
 
+void stop_motors() {
+  /* Set all motors to stop.
+  */
+  for (int i = 0; i < NUM_ENCODERS; i++) {
+    set_motor_vel(i, 0);
+  }
+}
 
 void updateSpeed() {
-  if (millis() - t1_mot >= dt) {
+  if (millis() - t1_mot >= dt_vel) {
     t1_mot = millis();
 
     for (int i = 0; i < NUM_ENCODERS; i++) {
       motorPos[i] = encoders[i].position;
-      motorSpeed[i] = (motorPos[i] - motorPrevPos[i]) / (dt / 1000.0);
+      motorSpeed[i] = (motorPos[i] - motorPrevPos[i]) / (dt_vel / 1000.0);
       motorPrevPos[i] = motorPos[i];
     }
     for (int i = 0; i < NUM_ENCODERS; i++) {
@@ -175,12 +268,4 @@ void updateSpeed() {
       }
     }
   }
-}
-
-
-void loop(void) {
-  
-  updateSpeed();
-  omni_IK(-0.4, 0, 0);  // en metros y rads/seg, Vx hacia adelante
-  apply_PID();
 }
