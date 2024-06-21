@@ -79,3 +79,6 @@ def main():
     
     server = RPIServer(server_ip, server_port, image_path)
     server.start()
+
+if __name__ == '__main__':
+    main()
