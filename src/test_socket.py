@@ -1,7 +1,5 @@
 import socket
 import time
-# from picamera2 import Picamera2
-import io
 
 class TCPServer:
     def __init__(self, host, port):
@@ -11,30 +9,24 @@ class TCPServer:
         self.client_conn = None
         self.client_addr = None
 
-        # self.picam2 = Picamera2()
-        # self.picam2.configure("still")
-        # self.picam2.start()
-
-        # # Give time for AEC and AWB to settle
-        # time.sleep(1)
-        # self.picam2.set_controls({"AeEnable": False, "AwbEnable": False, "FrameRate": 1.0})
-        # time.sleep(1)
-
-
     def start(self):
+        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen(1)  # Acepta una sola conexión
         print(f'Server is listening on {self.host}:{self.port}...')
 
+    def accept_connection(self):
         try:
             conn, addr = self.server_socket.accept()
             print(f'Connected by {addr}')
             self.client_conn = conn
             self.client_addr = addr
             return True
-        except KeyboardInterrupt:
-            print("Server shutting down...")
-            self.server_socket.close()
+        except socket.timeout:
+            print("Timeout while waiting for a connection.")
+            return False
+        except Exception as e:
+            print(f"Error accepting connection: {e}")
             return False
 
     def receive_message(self):
@@ -64,16 +56,20 @@ class TCPServer:
 
 if __name__ == '__main__':
     server = TCPServer('0.0.0.0', 23456)
+    server.start()
+
     while True:
-      if not self.client_conn:
-          print("No client connected.")
-          server.start()
-      else:
-          message = server.receive_message()
-          if message:
-              print("Received:", message)
-              # Aquí puedes agregar lógica adicional según lo que desees hacer con el mensaje recibido
-          else:
-              print('naita')
-      time.sleep(1)
+        if server.client_conn is None:
+            print("No client connected. Attempting to accept a new connection...")
+            server.accept_connection()
+        else:
+            message = server.receive_message()
+            if message:
+                print("Received:", message)
+                # Aquí puedes agregar lógica adicional según lo que desees hacer con el mensaje recibido
+            else:
+                print('No message received or connection closed.')
+
+        time.sleep(1)
+
     server.close_connection()
