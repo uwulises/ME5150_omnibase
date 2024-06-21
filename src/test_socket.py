@@ -42,7 +42,6 @@ class TCPServer:
                 self.client_conn = None
                 return None
             else:
-                print(f'Received from client at {self.client_addr}: {data.decode()}')
                 return data.decode()
         except Exception as e:
             print(f"Error receiving message: {e}")

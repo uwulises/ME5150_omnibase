@@ -6,14 +6,6 @@ class PCClient:
         self.server_ip = server_ip
         self.server_port = server_port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    def connect(self):
-        try:
-            self.socket.connect((self.server_ip, self.server_port))
-            print(f"Connected to server at {self.server_ip}:{self.server_port}")
-        except Exception as e:
-            print(f"Error connecting to server: {e}")
-            raise
     
     def send_message(self, msg):
         try:
@@ -23,28 +15,55 @@ class PCClient:
             
             self.socket.sendall(msg.encode())
             print(f"Sent to server: {msg}")
-            time.sleep(1)  # Wait for 1 second before sending the next message
+            time.sleep(1)  # Espera 1 segundo antes de enviar el próximo mensaje
 
         except Exception as e:
             print(f"Error sending data: {e}")
-            raise
-    
+            self.reconnect()
+
+    def receive_message(self):
+        try:
+            data = self.socket.recv(1024)
+            if not data:
+                print("Connection closed by server.")
+                self.reconnect()
+            else:
+                print(f"Received from server: {data.decode()}")
+
+        except Exception as e:
+            print(f"Error receiving data: {e}")
+            self.reconnect()
+
+    def connect(self):
+        print("Attempting to connect...")
+        while True:
+            try:
+                self.socket.connect((self.server_ip, self.server_port))
+                print(f"Connected to server at {self.server_ip}:{self.server_port}")
+                break
+            except Exception as e:
+                print(f"Connection attempt failed: {e}")
+                time.sleep(1)  # Espera 1 segundo antes de intentar nuevamente
+
     def close(self):
         try:
             self.socket.close()
             print("Connection closed.")
         except Exception as e:
             print(f"Error closing connection: {e}")
-            raise
 
-# Usage
+# Uso del cliente
 if __name__ == '__main__':
     client = PCClient('omni1.local', 23456)
-    client.connect()
-    try:
-
-        while True:
-            
-            client.send_message('alo')
-    finally:
-        client.close()
+    while True:
+        # Intenta conectarse al servidor, si no esta conectado ya
+        if not client.socket:
+            client.connect()
+        else:
+            try:
+                msg = input("Enter a message: ")
+                client.send_message(msg)
+                client.receive_message()
+            except KeyboardInterrupt:
+                client.close()
+                break
