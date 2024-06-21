@@ -64,15 +64,16 @@ class TCPServer:
 
 if __name__ == '__main__':
     server = TCPServer('0.0.0.0', 23456)
-    
-    if server.start():
-        while True:
-            message = server.receive_message()
-
-            if message:
-                print("Received:", message)
-                # Aquí puedes agregar lógica adicional según lo que desees hacer con el mensaje recibido
-            else:
-                print('naita')
-    
+    while True:
+      if not self.client_conn:
+          print("No client connected.")
+          server.start()
+      else:
+          message = server.receive_message()
+          if message:
+              print("Received:", message)
+              # Aquí puedes agregar lógica adicional según lo que desees hacer con el mensaje recibido
+          else:
+              print('naita')
+      time.sleep(1)
     server.close_connection()
