@@ -10,13 +10,13 @@ class RPIServer:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Reuse address option
         
-        self.picam2 = Picamera2()
-        self.picam2.configure("still")
-        self.picam2.start()
+        # self.picam2 = Picamera2()
+        # self.picam2.configure("still")
+        # self.picam2.start()
 
-        # Give time for AEC and AWB to settle
-        time.sleep(1)
-        self.picam2.set_controls({"AeEnable": False, "AwbEnable": False, "FrameRate": 1.0})
+        # # Give time for AEC and AWB to settle
+        # time.sleep(1)
+        # self.picam2.set_controls({"AeEnable": False, "AwbEnable": False, "FrameRate": 1.0})
         time.sleep(1)
 
     def start(self):
@@ -49,25 +49,25 @@ class RPIServer:
             print(f"Error receiving text message: {e}")
             raise
 
-    def send_image(self, client_socket):
-        try:
-            # Capture a single frame
-            stream = io.BytesIO()
-            r = self.picam2.capture_request()
-            r.save("main", stream)
-            r.release()
+    # def send_image(self, client_socket):
+    #     try:
+    #         # Capture a single frame
+    #         stream = io.BytesIO()
+    #         r = self.picam2.capture_request()
+    #         r.save("main", stream)
+    #         r.release()
 
-            # Send the image
-            stream.seek(0)
-            while True:
-                data = stream.read(1024)
-                if not data:
-                    break
-                client_socket.sendall(data)
+    #         # Send the image
+    #         stream.seek(0)
+    #         while True:
+    #             data = stream.read(1024)
+    #             if not data:
+    #                 break
+    #             client_socket.sendall(data)
 
-        except Exception as e:
-            print(f"Error sending image: {e}")
-            raise
+    #     except Exception as e:
+    #         print(f"Error sending image: {e}")
+    #         raise
 
     def close(self):
         self.socket.close()
