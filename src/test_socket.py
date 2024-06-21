@@ -1,38 +1,47 @@
 import socket
 
-ip = '0.0.0.0'
-port = 23456
-# Server setup
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind(('0.0.0.0', 65432))  # Bind to all available interfaces and a specific port
-server_socket.listen()
+class TCPServer:
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.bind((self.host, self.port))
+        self.server_socket.listen()
+        print(f'Server is listening on {self.host}:{self.port}...')
 
-print('Server is listening...')
+    def start(self):
+        try:
+            # while True:
+            conn, addr = self.server_socket.accept()
+            print(f'Connected by {addr}')
+                
+        except KeyboardInterrupt:
+            print("Server shutting down...")
+        finally:
+            self.server_socket.close()
 
-while True:
-    # Accept a client connection
-    conn, addr = server_socket.accept()
-    print(f'Connected by {addr}')
+    def listen(self):
+        try:
+            while True:
+                data = conn.recv(1024)
+                if not data:
+                    break
+                print(f'Received from client at {addr}: {data.decode()}')
+                return data.decode()
+        except Exception as e:
+            print(f"Error: {e}")
 
-    try:
-        while True:
-            # Receive data from the client
-            data = conn.recv(1024)
-            if not data:
-                break  # Break the loop if no data is received
+        finally:
+            conn.close()
+            print(f'Connection closed by {addr}')
+if __name__ == '__main__':
+    server = TCPServer('0.0.0.0', 23456)
+    server.start()
 
-            print(f'Received from client: {data.decode()}')
-
-            # Echo back the received data
-            conn.sendall(data)
-
-    except Exception as e:
-        print(f"Error: {e}")
-
-    finally:
-        # Close the connection
-        conn.close()
-        print(f'Connection closed by {addr}')
-
-# Close the server socket
-server_socket.close()
+    for i in range(100):
+        data = server.listen()
+        time.sleep(1)
+        if data == 'exit':
+            break
+    
+    server.close()

@@ -15,16 +15,15 @@ class PCClient:
             print(f"Error connecting to server: {e}")
             raise
     
-    def send_periodic_messages(self):
+    def send_message(self, msg):
         try:
-            while True:
-                message = input("Enter message to send (or 'exit' to stop): ")
-                if message.lower() == 'exit':
-                    break
-                
-                self.socket.sendall(message.encode())
-                print(f"Sent to server: {message}")
-                time.sleep(1)  # Wait for 1 second before sending the next message
+            if msg.lower() == 'exit':
+                self.close()
+                return
+            
+            self.socket.sendall(msg.encode())
+            print(f"Sent to server: {msg}")
+            time.sleep(1)  # Wait for 1 second before sending the next message
 
         except Exception as e:
             print(f"Error sending data: {e}")
@@ -40,9 +39,12 @@ class PCClient:
 
 # Usage
 if __name__ == '__main__':
-    client = PCClient('192.168.1.23', 23456)
+    client = PCClient('omni1.local', 23456)
+    client.connect()
     try:
-        client.connect()
-        client.send_periodic_messages()
+
+        while True:
+            
+            client.send_message('alo')
     finally:
         client.close()
