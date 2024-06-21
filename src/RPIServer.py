@@ -77,7 +77,7 @@ def main():
     server_ip = '192.168.1.23'  # Replace with the IP address of your RPI
     server_port = 12345
     
-    server = RPIServer(server_ip, server_port, image_path)
+    server = RPIServer(server_ip, server_port)
     server.start()
 
 if __name__ == '__main__':
