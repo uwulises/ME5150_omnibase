@@ -49,17 +49,20 @@ def main():
     # image_save_path = 'received_image.jpg'
 
     client = PCClient(server_ip, server_port)
+    client.connect()
+    time.sleep(2)  # Wait for server to start
     while True:
         try:
-            client.connect()
+            print(client.socket)
             client.send_text(text_message)
             time.sleep(2)
             # client.receive_image(image_save_path)
         except Exception as e:
             print(f"An error occurred: {e}")
-        finally:
-            client.close()
-            time.sleep(2)  # Wait before attempting to reconnect
+            time.sleep(1)
+    
+    client.close()
+    time.sleep(2)  # Wait before attempting to reconnect
 
 if __name__ == '__main__':
     main()

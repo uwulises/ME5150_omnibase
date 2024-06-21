@@ -1,88 +1,38 @@
 import socket
-import time
-# from picamera2 import Picamera2
-import io
 
-class RPIServer:
-    def __init__(self, server_ip, server_port):
-        self.server_ip = server_ip
-        self.server_port = server_port
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Reuse address option
-        
-        # self.picam2 = Picamera2()
-        # self.picam2.configure("still")
-        # self.picam2.start()
+ip = '0.0.0.0'
+port = 23456
+# Server setup
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind(('0.0.0.0', 65432))  # Bind to all available interfaces and a specific port
+server_socket.listen()
 
-        # # Give time for AEC and AWB to settle
-        # time.sleep(1)
-        # self.picam2.set_controls({"AeEnable": False, "AwbEnable": False, "FrameRate": 1.0})
-        # time.sleep(1)
+print('Server is listening...')
 
-    def start(self):
-        self.socket.bind((self.server_ip, self.server_port))
-        self.socket.listen(1)
-        print(f"Server listening on {self.server_ip}:{self.server_port}")
+while True:
+    # Accept a client connection
+    conn, addr = server_socket.accept()
+    print(f'Connected by {addr}')
+
+    try:
         while True:
-            client_socket, addr = self.socket.accept()
-            print(f"Connected by {addr}")
-            try:
-                self.handle_client(client_socket)
-            except Exception as e:
-                print(f"Error handling client {addr}: {e}")
-            finally:
-                client_socket.close()
-
-    def handle_client(self, client_socket):
-        try:
-            text_message = self.receive_text(client_socket)
-            print("Received text message:", text_message)
-            # self.send_image(client_socket)
-            # print("Image sent to client")
-        except Exception as e:
-            print(f"Error handling client: {e}")
-            raise
-
-    def receive_text(self, client_socket):
-        try:
-            data = client_socket.recv(1024).decode('utf-8')
+            # Receive data from the client
+            data = conn.recv(1024)
             if not data:
-                raise ValueError("Received empty text message")
-            return data
-        except Exception as e:
-            print(f"Error receiving text message: {e}")
-            raise
+                break  # Break the loop if no data is received
 
-    # def send_image(self, client_socket):
-    #     try:
-    #         # Capture a single frame
-    #         stream = io.BytesIO()
-    #         r = self.picam2.capture_request()
-    #         r.save("main", stream)
-    #         r.release()
+            print(f'Received from client: {data.decode()}')
 
-    #         # Send the image
-    #         stream.seek(0)
-    #         while True:
-    #             data = stream.read(1024)
-    #             if not data:
-    #                 break
-    #             client_socket.sendall(data)
+            # Echo back the received data
+            conn.sendall(data)
 
-    #     except Exception as e:
-    #         print(f"Error sending image: {e}")
-    #         raise
+    except Exception as e:
+        print(f"Error: {e}")
 
-    def close(self):
-        self.socket.close()
-        self.picam2.stop()
+    finally:
+        # Close the connection
+        conn.close()
+        print(f'Connection closed by {addr}')
 
-def main():
-    server_ip = '192.168.1.23'  # Replace with the IP address of your RPI
-    server_port = 12345
-    
-    server = RPIServer(server_ip, server_port)
-    server.start()
-
-if __name__ == '__main__':
-    main()
+# Close the server socket
+server_socket.close()
