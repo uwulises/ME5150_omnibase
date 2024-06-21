@@ -17,7 +17,7 @@ class RPIServer:
         # # Give time for AEC and AWB to settle
         # time.sleep(1)
         # self.picam2.set_controls({"AeEnable": False, "AwbEnable": False, "FrameRate": 1.0})
-        time.sleep(1)
+        # time.sleep(1)
 
     def start(self):
         self.socket.bind((self.server_ip, self.server_port))
@@ -34,10 +34,14 @@ class RPIServer:
                 client_socket.close()
 
     def handle_client(self, client_socket):
-        text_message = self.receive_text(client_socket)
-        print("Received text message:", text_message)
-        # self.send_image(client_socket)
-        # print("Image sent to client")
+        try:
+            text_message = self.receive_text(client_socket)
+            print("Received text message:", text_message)
+            # self.send_image(client_socket)
+            # print("Image sent to client")
+        except Exception as e:
+            print(f"Error handling client: {e}")
+            raise
 
     def receive_text(self, client_socket):
         try:
