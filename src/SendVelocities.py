@@ -44,7 +44,8 @@ class SendVelocities:
         if self.serial is None:
             print('Serial port is not open')
             return
-        msg = f"{dt}"
+        msg = f"{dt}\n"
+        # print("msg: ", msg.encode())
         self.serial.write(msg.encode())
         print("dt sent")
 
@@ -56,7 +57,8 @@ class SendVelocities:
         return f"{vx},{vy},{w};"
 
     def read(self):
-        data = self.serial.readline()
+        data = self.serial.read_all()
+        print(data)
         decoded_data = data.decode().strip()
         return decoded_data
 
