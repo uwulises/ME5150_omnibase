@@ -57,7 +57,7 @@ class SendVelocities:
         return f"{vx},{vy},{w};"
 
     def read(self):
-        data = self.serial.read_all()
+        data = self.serial.read()
         print(data)
         decoded_data = data.decode().strip()
         return decoded_data
