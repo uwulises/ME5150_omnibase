@@ -5,39 +5,38 @@ class PCClient:
     def __init__(self, server_ip, server_port):
         self.server_ip = server_ip
         self.server_port = server_port
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
     
     def send_message(self, msg):
-        try:
-            if msg.lower() == 'exit':
-                self.close()
-                return
-            
+      while True:
+        try:            
             self.socket.sendall(msg.encode())
             print(f"Sent to server: {msg}")
             time.sleep(1)  # Espera 1 segundo antes de enviar el próximo mensaje
+            break
 
         except Exception as e:
             print(f"Error sending data: {e}")
-            self.reconnect()
+            self.connect()
 
     def receive_message(self):
         try:
             data = self.socket.recv(1024)
             if not data:
                 print("Connection closed by server.")
-                self.reconnect()
+                self.connect()
             else:
                 print(f"Received from server: {data.decode()}")
 
         except Exception as e:
             print(f"Error receiving data: {e}")
-            self.reconnect()
+            self.connect()
 
     def connect(self):
         print("Attempting to connect...")
         while True:
-            try:
+            try: 
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.connect((self.server_ip, self.server_port))
                 print(f"Connected to server at {self.server_ip}:{self.server_port}")
                 break
@@ -56,14 +55,10 @@ class PCClient:
 if __name__ == '__main__':
     client = PCClient('omni1.local', 23456)
     while True:
-        # Intenta conectarse al servidor, si no esta conectado ya
-        if not client.socket:
-            client.connect()
-        else:
-            try:
-                msg = input("Enter a message: ")
-                client.send_message(msg)
-                client.receive_message()
-            except KeyboardInterrupt:
-                client.close()
-                break
+        try:
+            msg = input("Enter a message: ")
+            client.send_message(msg)
+        except KeyboardInterrupt:
+            client.close()
+            break
+

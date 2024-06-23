@@ -68,7 +68,6 @@ if __name__ == '__main__':
                 # Aquí puedes agregar lógica adicional según lo que desees hacer con el mensaje recibido
             else:
                 print('No message received or connection closed.')
-
         time.sleep(1)
 
     server.close_connection()

@@ -7,7 +7,7 @@ def main():
     dt = 0.5
     T_max = 10
     qf = [0.5, 0.2, 0.1]
-    sv = SendVelocities.SendVelocities(port = "/dev/serial0")
+    sv = SendVelocities.SendVelocities(port = "/dev/ttyAMA0")
     
     data = ""
     while "Dt" not in data:
@@ -24,7 +24,7 @@ def main():
     data = ""
     sv.send_velocities(velocities_dt)
     while "Traj" not in data:
-        # sv.send_velocities(velocities_dt)
+        sv.send_velocities(velocities_dt)
         data = sv.read()
         print('retorno:', data)
         time.sleep(0.1)

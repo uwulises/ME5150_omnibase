@@ -3,7 +3,7 @@ import serial
 
 class SendVelocities:
     # Initialize the serial port
-    def __init__(self, port="/dev/serial0"):
+    def __init__(self, port="/dev/ttyAMA0"):
         self.port = port
         self.serial = None
         self.open_serial()

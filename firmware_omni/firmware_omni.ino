@@ -6,6 +6,7 @@
 #include "parameters.h"
 
 
+
 // Variables
 const int NUM_ENCODERS = 4;
 const int motors[NUM_ENCODERS][2] = {
@@ -61,10 +62,10 @@ void isrB3() {
   encoders[3].updateB();
 }
 
-
 // Variables seriales
-
+// SerialPIO serial2(16, 17);
 SerialReceiver serialR;
+
 float dt = 0;
 String msg = "";
 
@@ -88,18 +89,20 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(encoders[3].pinA), isrA3, CHANGE);
   attachInterrupt(digitalPinToInterrupt(encoders[3].pinB), isrB3, CHANGE);
 
-  Serial.begin(115200);
-  while (!Serial) {
-    ;  // Esperar a que el puerto serie esté listo
-  }
-  delay(3000);  // Espera inicial para dar tiempo a la conexión serie
+  // Serial.begin(115200);
+  // serial2.begin(115200);
+
+  // while (!serial2.available()) {
+  //   ;  // Esperar a que el puerto serie esté listo
+  // }
+  // delay(3000);  // Espera inicial para dar tiempo a la conexión serie
   state = 1;    // Inicia en el estado 1
 }
 
 void loop() {
 
   // Si se corta la comunicación serie, detener los motores
-  if (!Serial) {
+  if (!serialR.available()){
     state = 0;
   } else {  // Si hay comunicación serie, actualizar la velocidad de los motores
     updateSpeed();
@@ -109,7 +112,7 @@ void loop() {
 
     // Estado 0: Si no hay comunicación serie, detener los motores
     case 0:
-      if (!Serial) {
+      if (!serialR.available()) {
         stop_motors();        // Detener los motores
         state = 0;            // Mantener en estado 0 si no hay comunicación serie
       } else {                // Si hay comunicación serie, pasar al estado 1

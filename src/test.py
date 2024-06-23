@@ -6,7 +6,7 @@ import time
 def main():
     dt = 0.5
     T_max = 10
-    sv = SendVelocities.SendVelocities(port = "/dev/serial0")
+    sv = SendVelocities.SendVelocities(port = "/dev/ttyAMA0")
     data = ""
     while "Dt" not in data:
         data = sv.read()

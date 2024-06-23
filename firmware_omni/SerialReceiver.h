@@ -1,12 +1,14 @@
 #ifndef SERIAL_RECEIVER_H
 #define SERIAL_RECEIVER_H
 
-#include <Arduino.h>  // Include this line to use Serial
+#include <Arduino.h>
 
 class SerialReceiver {
 private:
   String action = "";
   String receive_msg = "";
+  String f_msg = "";
+  SerialPIO serial2;
 
 public:
   SerialReceiver();
@@ -19,6 +21,7 @@ public:
   void processMsg();
   void splitAction();
   void clearSerialBuffer();
+  bool available();
   String getMsg();
   String getAction();
 };

@@ -1,14 +1,18 @@
 #include "SerialReceiver.h"
 
-SerialReceiver::SerialReceiver() {
+SerialReceiver::SerialReceiver() : serial2(16, 17) {
+  // Inicializa serial2 en el constructor
+  serial2.begin(115200);
 }
 
+
 void SerialReceiver::sendMsg(const String &msg) {
-  Serial.println(msg);  // Usar println para indicar el fin del mensaje
+  f_msg = msg + "\n";
+  serial2.write(f_msg.c_str());
 }
 
 void SerialReceiver::setMsg(const String &msg) {
-  receive_msg = "";
+  receive_msg = msg;
 }
 
 void SerialReceiver::processMsg() {
@@ -26,8 +30,8 @@ void SerialReceiver::processMsg() {
 }
 
 void SerialReceiver::receiveData() {
-  while (Serial.available() > 0) {
-    receive_msg = Serial.readStringUntil('\n');
+  while (serial2.available() > 0) {
+    receive_msg = serial2.read(); //receive_msg += (char)serial2.read();
   }
 }
 
@@ -47,8 +51,8 @@ void SerialReceiver::splitAction() {
 }
 
 void SerialReceiver::clearSerialBuffer() {
-  while (Serial.available() > 0) {
-    Serial.read();
+  while (serial2.available() > 0) {
+    serial2.read();
   }
 }
 
@@ -58,4 +62,8 @@ String SerialReceiver::getAction() {
 
 String SerialReceiver::getMsg() {
   return receive_msg;
+}
+
+bool SerialReceiver::available() {
+  return serial2.available() > 0;
 }
