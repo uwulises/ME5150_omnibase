@@ -31,7 +31,7 @@ class PCClient:
                 print("Connection closed by server.")
                 self._connect()
             else:
-                # print(f"Received from server: {data.decode()}")
+                print(f"Received from server: {data.decode()}")
                 return data.decode()
 
         except Exception as e:

@@ -54,9 +54,11 @@ class TCPServer:
             self.client_conn = None
 
     def send_confirmation(self):
-       
+        print('Sending confirmation to client...')
         try:
-            self.client_conn.sendall(b'OK')
+            msg = 'OK'
+            code_msg = msg.encode()
+            self.client_conn.sendall(code_msg)
             print('Confirmation sent to client')
         except Exception as e:
             print(f"Error sending confirmation: {e}")
