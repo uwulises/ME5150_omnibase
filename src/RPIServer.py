@@ -4,12 +4,18 @@ from picamera2 import Picamera2
 import io
 
 class RPIServer:
-    def __init__(self, server_ip, server_port):
-        self.server_ip = server_ip
-        self.server_port = server_port
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Reuse address option
-        
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_conn = None
+        self.client_addr = None
+        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.server_socket.bind((self.host, self.port))
+        self.server_socket.listen(1)  # Acepta una sola conexión
+
+        print(f'Server is listening on {self.host}:{self.port}...')
+
         self.picam2 = Picamera2()
         self.picam2.configure("still")
         self.picam2.start()
@@ -20,35 +26,47 @@ class RPIServer:
         print("Camera configured")
         time.sleep(1)
 
-    def start(self):
-        self.socket.bind((self.server_ip, self.server_port))
-        self.socket.listen(1)
-        print(f"Server listening on {self.server_ip}:{self.server_port}")
-        while True:
-            client_socket, addr = self.socket.accept()
-            print(f"Connected by {addr}")
-            try:
-                self.handle_client(client_socket)
-            except Exception as e:
-                print(f"Error handling client {addr}: {e}")
-            finally:
-                client_socket.close()
-
-    def handle_client(self, client_socket):
-        text_message = self.receive_text(client_socket)
-        print("Received text message:", text_message)
-        # self.send_image(client_socket)
-        # print("Image sent to client")
-
-    def receive_text(self, client_socket):
+    def accept_connection(self):
         try:
-            data = client_socket.recv(1024).decode('utf-8')
-            if not data:
-                raise ValueError("Received empty text message")
-            return data
+            conn, addr = self.server_socket.accept()
+            print(f'Connected by {addr}')
+            self.client_conn = conn
+            self.client_addr = addr
+            return True
+        except socket.timeout:
+            print("Timeout while waiting for a connection.")
+            return False
         except Exception as e:
-            print(f"Error receiving text message: {e}")
-            raise
+            print(f"Error accepting connection: {e}")
+            return False
+
+    def receive_message(self):
+        if not self.client_conn:
+            print("No client connected.")
+            return None
+
+        try:
+            data = self.client_conn.recv(1024)
+            return data.decode()
+
+        except Exception as e:
+            print(f"Error receiving message: {e}")
+            return None
+
+    def close_connection(self):
+        if self.client_conn:
+            self.client_conn.close()
+            print(f'Connection closed by {self.client_addr}')
+            self.client_conn = None
+
+    def send_confirmation(self):
+        print('Sending confirmation to client...')
+        try:
+            msg = 'OK'
+            self.client_conn.sendall(msg.encode())
+            print('Confirmation sent to client')
+        except Exception as e:
+            print(f"Error sending confirmation: {e}")
 
     def send_image(self, client_socket):
         try:
@@ -70,16 +88,30 @@ class RPIServer:
             print(f"Error sending image: {e}")
             raise
 
-    def close(self):
-        self.socket.close()
-        self.picam2.stop()
 
 def main():
-    server_ip = '192.168.166.233'  # Replace with the IP address of your RPI
-    server_port = 12345
-    
-    server = RPIServer(server_ip, server_port)
+    server = TCPServer('0.0.0.0', 12345)
     server.start()
+
+    while True:
+        if server.client_conn is None:
+            print("No client connected. Attempting to accept a new connection...")
+            server.accept_connection()
+        else:
+            message = server.receive_message()
+            if message:
+                print("Received:", message)
+                server.send_confirmation()
+            else:
+                print('No message received or connection closed.')
+
+            server.send_image(server.client_conn)
+            
+        time.sleep(1)
+
+    server.close_connection()
+
+
 
 if __name__ == '__main__':
     main()

@@ -57,19 +57,18 @@ class PCClient:
     #         self.socket = None
     #         print("Connection closed")
 
-    # def receive_image(self, image_save_path):
-    #     try:
-    #         with open(image_save_path, 'wb') as f:
-    #             while True:
-    #                 data = self.socket.recv(1024)
-    #                 if not data:
-    #                     break
-    #                 f.write(data)
-    #         print("Image received and saved as", image_save_path)
-    #     except Exception as e:
-    #         print(f"Error receiving image: {e}")
-    #         self.close()  # Ensure socket is closed on error
-    #         raise
+    def receive_image(self, image_save_path):
+        try:
+            with open(image_save_path, 'wb') as f:
+                while True:
+                    data = self.socket.recv(1024)
+                    if not data:
+                        break
+                    f.write(data)
+            print("Image received and saved as", image_save_path)
+        except Exception as e:
+            print(f"Error receiving image: {e}")
+            
 
     def check_connection_and_fix(self): 
         connected = False  
@@ -85,20 +84,17 @@ class PCClient:
                 time.sleep(2)
 
     def send(self, msg):
-        print('Want to send')
-
         ready = False
         retries = 0
         while not ready and retries < 3:
-            print(ready, retries)
             try:
-                print('wants to send')
                 self._send_message(msg)
                 time.sleep(0.2)
-                print('wants to get conf')
+                print("Sent message, waiting for response...")
                 data = self.socket.recv(1024)
                 if msg is not None:
                     ready = True
+
             except KeyboardInterrupt:
                 self._close()
                 break
@@ -118,6 +114,7 @@ def main():
     client = PCClient(ip_server, 12345)
     
     client.send('lalalla')
+    client.receive_image('image.jpg')
 
 if __name__ == '__main__':
     main()

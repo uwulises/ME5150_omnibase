@@ -1,13 +1,15 @@
-import GetTrajectory
-import SendVelocities
+from GetTrajectory import GetTrajectory
+from SendVelocities import SendVelocities
 import numpy as np
 import time
+from RPIServer import RPIServer
 
 def main():
+    
     dt = 0.5
     T_max = 10
     qf = [0.5, 0.2, 0.1]
-    sv = SendVelocities.SendVelocities(port = "/dev/ttyACM0")
+    sv = SendVelocities(port = "/dev/ttyACM0")
     
     data = ""
     while "Dt" not in data:
@@ -17,7 +19,7 @@ def main():
         time.sleep(0.1)
     
     sv.read_all()
-    gt = GetTrajectory.GetTrajectory(qf, T_max, dt=dt)
+    gt = GetTrajectory(qf, T_max, dt=dt)
     _, velocities_dt = gt.get_trajectory()
     print("Velocidades (dt):\n", velocities_dt)
 
