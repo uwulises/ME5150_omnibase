@@ -96,7 +96,7 @@ class PCClient:
                 time.sleep(0.2)
                 print("Sent message, waiting for response...")
                 data = self.socket.recv(1024)
-                if msg is not None:
+                if 'OK' in data.decode():
                     ready = True
 
             except KeyboardInterrupt:

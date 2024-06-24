@@ -52,15 +52,14 @@ def main():
                 
                 vels = robot.get_vels(qf, t_max, dt)
 
-                robot.sv.send_velocities(vels)
-
                 while "OK2" not in data:
                     robot.sv.send_velocities(velocities_dt)
                     data = robot.sv.read()
                     print('retorno:', data)
                     time.sleep(0.1)
 
-                sv.close()
+                server.send_confirmation()
+                robot.sv.close()
                 
         time.sleep(0.1)
 
