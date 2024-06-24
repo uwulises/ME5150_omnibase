@@ -65,7 +65,7 @@ class PCClient:
                     data = self.socket.recv(1024)
                     if not data:
                         break
-                    f.write(data)
+                    f.write(data.decode())
             print("Image received and saved as", image_save_path)
         except Exception as e:
             print(f"Error receiving image: {e}")
