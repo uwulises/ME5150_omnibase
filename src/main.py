@@ -36,40 +36,51 @@ def main():
             
             message = server.receive_message()
             if message:
-                print("Received:", message)
+                print("Received from PC:", message)
                 server.send_confirmation()
 
                 x, y, o, dt, t_max = robot.split_message(message)
                 qf = [x, y, o]
-                robot.get_trajectory(qf, t_max, dt)
+                
                 # Send dt to arduino
                 data = ""
-                while "Dt" not in data:
-                    sv.send_dt(dt)
-                    data = sv.read()
+                while "OK1" not in data:
+                    robot.sv.send_dt(dt)
+                    data = robot.read()
                     print('retorno dt:', data)
                     time.sleep(0.1)
                 
+                vels = robot.get_vels(qf, t_max, dt)
+
+                robot.sv.send_velocities(vels)
+
+                while "OK2" not in data:
+                    sv.send_velocities(velocities_dt)
+                    data = sv.read()
+                    print('retorno:', data)
+                    time.sleep(0.1)
+
+                sv.close()
                 
         time.sleep(0.1)
 
     server.close_connection()
     
 
-    sv.read_all()
-    gt = GetTrajectory(qf, T_max, dt=dt)
-    _, velocities_dt = gt.get_trajectory()
-    print("Velocidades (dt):\n", velocities_dt)
+    # sv.read_all()
+    # gt = GetTrajectory(qf, T_max, dt=dt)
+    # _, velocities_dt = gt.get_trajectory()
+    # print("Velocidades (dt):\n", velocities_dt)
 
-    data = ""
-    sv.send_velocities(velocities_dt)
-    while "Traj" not in data:
-        # sv.send_velocities(velocities_dt)
-        data = sv.read()
-        print('retorno:', data)
-        time.sleep(0.1)
+    # data = ""
+    # sv.send_velocities(velocities_dt)
+    # while "Traj" not in data:
+    #     # sv.send_velocities(velocities_dt)
+    #     data = sv.read()
+    #     print('retorno:', data)
+    #     time.sleep(0.1)
 
-    sv.close()
-    print("Done")
+    # sv.close()
+    # print("Done")
 
 main()

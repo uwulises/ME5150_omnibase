@@ -130,7 +130,7 @@ void loop() {
       dt = serialR.getMsg().toFloat();
 
       if (dt != 0) {
-        serialR.sendMsg("Dt received");
+        serialR.sendMsg("OK1");
         state = 2;  // Pasar al estado 2 después de enviar "Dt"
         serialR.setMsg();
       }
@@ -176,7 +176,7 @@ void loop() {
 
       if (msg == "") {
         state = 2;  // Volver al estado 2 si no hay mensaje
-        serialR.sendMsg("Traj");
+        serialR.sendMsg("OK2");
 
       } else {
         state = 3;  // Volver al estado 3 si hay mensaje

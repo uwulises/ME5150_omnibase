@@ -3,7 +3,7 @@ import time
 # from picamera2 import Picamera2
 import io
 
-class RPIController:
+class RPIServer:
     def __init__(self, host, port):
         self.host = host
         self.port = port
@@ -103,17 +103,9 @@ class RPIController:
     #         print(f"Error sending image: {e}")
     #         raise
 
-def split_message(message):
-    assert isinstance(message, str)
-    
-    x, y = message.split(',')
-    x = x.split(':')[-1]
-    y = y.split(':')[-1]
-    return x, y
-def obtain_trajectory():
 
 def main():
-    server = RPIController('0.0.0.0', 12345)
+    server = RPIServer('0.0.0.0', 12345)
     # dt_image = time.time()
 
     while True:
