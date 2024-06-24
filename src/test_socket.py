@@ -53,6 +53,14 @@ class TCPServer:
             print(f'Connection closed by {self.client_addr}')
             self.client_conn = None
 
+    def send_confirmation(self):
+       
+        try:
+            self.client_conn.sendall(b'OK')
+            print('Confirmation sent to client')
+        except Exception as e:
+            print(f"Error sending confirmation: {e}")
+
 if __name__ == '__main__':
     server = TCPServer('0.0.0.0', 12345)
     server.start()
@@ -65,6 +73,7 @@ if __name__ == '__main__':
             message = server.receive_message()
             if message:
                 print("Received:", message)
+                server.send_confirmation()
                 # Aquí puedes agregar lógica adicional según lo que desees hacer con el mensaje recibido
             else:
                 print('No message received or connection closed.')

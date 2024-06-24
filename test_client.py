@@ -64,11 +64,9 @@ if __name__ == '__main__':
         else:
             try:
                 print("Enter 'exit' to close the connection.")
-                msg = input("Enter a message: ")
+                msg = 'lalalla'
                 client.send_message(msg)
                 print('msg send')
-                # client.receive_message()
-                # print('msg received')
             except KeyboardInterrupt:
                 client.close()
                 break

@@ -7,21 +7,62 @@ class PCClient:
         self.server_port = server_port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
-    def connect(self):
+    def _send_message(self, msg):
         try:
-            self.socket.connect((self.server_ip, self.server_port))
+            if msg.lower() == 'exit':
+                self.close()
+                return
+            
+            self.socket.sendall(msg.encode())
+            print(f"Sent to server: {msg}")
+            time.sleep(1)  # Espera 1 segundo antes de enviar el próximo mensaje
+
         except Exception as e:
-            print(f"Error connecting to server: {e}")
-            raise
-    
-    def send_text(self, text_message):
+            if e.errno == 10057:
+                print(f"Not connected to server")
+            else:
+                print(f"Error sending data: {e}")
+            self._connect()
+
+    def _receive_message(self):
         try:
-            self.socket.sendall(text_message.encode('utf-8'))
+            data = self.socket.recv(1024)
+            if not data:
+                print("Connection closed by server.")
+                self._connect()
+            else:
+                # print(f"Received from server: {data.decode()}")
+                return data.decode()
+
         except Exception as e:
-            print(f"Error sending text message: {e}")
-            self.close()  # Ensure socket is closed on error
-            raise
-    
+            print(f"Error receiving data: {e}")
+            self._connect()
+
+    def _connect(self):
+        print("Attempting to connect...")
+        while True:
+            try:
+                self.socket.connect((self.server_ip, self.server_port))
+                print(f"Connected to server at {self.server_ip}:{self.server_port}")
+                return
+            except Exception as e:
+                if e.errno == 10061:
+                    print(f"Connection attempt failed: Server may be down, retrying in 5 seconds...")
+                    time.sleep(5)
+                elif e.errno == 10056:
+                    print(f"Connection attempt failed: {e}, retrying in 5 seconds...")
+                    time.sleep(2)  # Espera 1 segundo antes de intentar nuevamente
+                else:
+                    print(f"Connection attempt failed: {e}")
+                    time.sleep(1)
+
+    def _close(self):
+        try:
+            self.socket.close()
+            print("Connection closed.")
+        except Exception as e:
+            print(f"Error closing connection: {e}")
+
     # def receive_image(self, image_save_path):
     #     try:
     #         with open(image_save_path, 'wb') as f:
@@ -35,34 +76,30 @@ class PCClient:
     #         print(f"Error receiving image: {e}")
     #         self.close()  # Ensure socket is closed on error
     #         raise
-    
-    def close(self):
-        if self.socket:
-            self.socket.close()
-            self.socket = None  
 
-
+    def send(self, msg):
+        ready = False
+        while not ready:
+            # Intenta conectarse al servidor, si no esta conectado ya
+            if not self.socket:
+                self._connect()
+            else:
+                try:
+                    self._send_message(msg)
+                    print('msg send')
+                    msg = self._receive_message()
+                    if 'OK' in msg:
+                        ready = True
+                except KeyboardInterrupt:
+                    self._close()
+                    break
+        
 def main():
-    server_ip = '192.168.166.233'  # Reemplaza con la IP de tu Raspberry Pi
-    server_port = 12345
-    text_message = 'Hello Raspberry Pi'
-    # image_save_path = 'received_image.jpg'
-
-    client = PCClient(server_ip, server_port)
-    client.connect()
-    time.sleep(2)  # Wait for server to start
-    while True:
-        try:
-            print(client.socket)
-            client.send_text(text_message)
-            time.sleep(2)
-            # client.receive_image(image_save_path)
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            time.sleep(1)
+    ip_server = 'omni1.local'
+    ip_server = '192.168.166.233'
+    client = PCClient(ip_server, 12345)
     
-    client.close()
-    time.sleep(2)  # Wait before attempting to reconnect
+    client.send('lalalla')
 
 if __name__ == '__main__':
     main()
