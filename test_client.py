@@ -19,20 +19,20 @@ class PCClient:
 
         except Exception as e:
             print(f"Error sending data: {e}")
-            self.reconnect()
+            self.connect()
 
     def receive_message(self):
         try:
             data = self.socket.recv(1024)
             if not data:
                 print("Connection closed by server.")
-                self.reconnect()
+                self.connect()
             else:
                 print(f"Received from server: {data.decode()}")
 
         except Exception as e:
             print(f"Error receiving data: {e}")
-            self.reconnect()
+            self.connect()
 
     def connect(self):
         print("Attempting to connect...")
@@ -40,7 +40,8 @@ class PCClient:
             try:
                 self.socket.connect((self.server_ip, self.server_port))
                 print(f"Connected to server at {self.server_ip}:{self.server_port}")
-                break
+                print('loll')
+                return
             except Exception as e:
                 print(f"Connection attempt failed: {e}")
                 time.sleep(1)  # Espera 1 segundo antes de intentar nuevamente
@@ -54,16 +55,20 @@ class PCClient:
 
 # Uso del cliente
 if __name__ == '__main__':
-    client = PCClient('omni1.local', 23456)
+    client = PCClient('192.168.166.233', 12345)
     while True:
         # Intenta conectarse al servidor, si no esta conectado ya
         if not client.socket:
             client.connect()
+            print('aloo')
         else:
             try:
+                print("Enter 'exit' to close the connection.")
                 msg = input("Enter a message: ")
                 client.send_message(msg)
-                client.receive_message()
+                print('msg send')
+                # client.receive_message()
+                # print('msg received')
             except KeyboardInterrupt:
                 client.close()
                 break

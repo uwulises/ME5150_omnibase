@@ -54,7 +54,7 @@ class TCPServer:
             self.client_conn = None
 
 if __name__ == '__main__':
-    server = TCPServer('0.0.0.0', 23456)
+    server = TCPServer('0.0.0.0', 12345)
     server.start()
 
     while True:

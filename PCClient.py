@@ -43,7 +43,7 @@ class PCClient:
 
 
 def main():
-    server_ip = '192.168.1.23'  # Reemplaza con la IP de tu Raspberry Pi
+    server_ip = '192.168.166.233'  # Reemplaza con la IP de tu Raspberry Pi
     server_port = 12345
     text_message = 'Hello Raspberry Pi'
     # image_save_path = 'received_image.jpg'
