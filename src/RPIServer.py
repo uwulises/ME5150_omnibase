@@ -72,8 +72,8 @@ class RPIServer:
         try:
             # Capture a single frame
             stream = io.BytesIO()
-            r =  self.picam2.capture_file(data, format='jpeg')
-            r.save(stream, format='jpeg')
+            image = self.picam2.capture_image()
+            image.save(stream, format='jpeg')
 
             # Send the image
             stream.seek(0)
@@ -90,7 +90,7 @@ class RPIServer:
 
 def main():
     server = RPIServer('0.0.0.0', 12345)
-    
+
     while True:
         if server.client_conn is None:
             print("No client connected. Attempting to accept a new connection...")
