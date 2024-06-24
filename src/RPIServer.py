@@ -72,9 +72,8 @@ class RPIServer:
         try:
             # Capture a single frame
             stream = io.BytesIO()
-            r = self.picam2.capture_request()
-            r.save("main", stream)
-            r.release()
+            r =  self.picam2.capture_file(data, format='jpeg')
+            r.save(stream, format='jpeg')
 
             # Send the image
             stream.seek(0)
@@ -90,7 +89,7 @@ class RPIServer:
 
 
 def main():
-    server = TCPServer('0.0.0.0', 12345)
+    server = RPIServer('0.0.0.0', 12345)
     server.start()
 
     while True:
