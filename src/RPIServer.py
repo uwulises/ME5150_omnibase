@@ -68,7 +68,7 @@ class RPIServer:
         except Exception as e:
             print(f"Error sending confirmation: {e}")
 
-    def send_image(self, client_socket):
+    def send_image(self):
         print('Sending image to client...')
         try:
             # Capture a single frame
@@ -81,11 +81,12 @@ class RPIServer:
             # Send the image
             stream.seek(0)
             while True:
-                print("Sending image data...")
+                # print("Sending image data...")
                 data = stream.read(1024)
+                print(data)
                 if not data:
                     break
-                client_socket.sendall(data)
+                self.client_conn.sendall(data)
 
         except Exception as e:
             print(f"Error sending image: {e}")
@@ -107,7 +108,7 @@ def main():
             else:
                 print('No message received or connection closed.')
 
-            server.send_image(server.client_conn)
+            server.send_image()
             
         time.sleep(1)
 
