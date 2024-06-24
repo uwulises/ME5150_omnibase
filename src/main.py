@@ -6,8 +6,8 @@ from RPIServer import RPIServer
 
 
 class OmniController:
-    def __init__(self, dev_id = "/dev/ttyACM0"):
-        self.sv = SendVelocities(port = dev_id)
+    def __init__(self, port = "/dev/ttyACM0"):
+        self.sv = SendVelocities(port = port)
             
     def split_message(self, message):
         assert isinstance(message, str), "Message must be a string."       
@@ -27,7 +27,7 @@ class OmniController:
 def main():
     server = RPIServer('0.0.0.0', 12345)
     robot = OmniController()
-
+    
     while True:
         if server.client_conn is None:
             print("No client connected. Attempting to accept a new connection...")
@@ -36,33 +36,39 @@ def main():
             
             message = server.receive_message()
             if message:
+
                 print("Received from PC:", message)
                 server.send_confirmation()
 
                 x, y, o, dt, t_max = robot.split_message(message)
                 qf = [x, y, o]
                 
-                # Send dt to arduino
+                print('-Communication with RpiPico-')
+
+                # Send dt to Arduino
                 data = ""
                 while "OK1" not in data:
                     robot.sv.send_dt(dt)
                     data = robot.sv.read()
-                    print('retorno dt:', data)
+                    print('Retorno:', data)
                     time.sleep(0.1)
                 
                 vels = robot.get_vels(qf, t_max, dt)
 
+                # Send velocities to Arduino
                 while "OK2" not in data:
                     robot.sv.send_velocities(vels)
                     data = robot.sv.read()
-                    print('retorno:', data)
+                    print('Retorno:', data)
                     time.sleep(0.1)
 
+                print('-END Communication with RpiPico-')
                 server.send_confirmation()
-                robot.sv.close()
+                
                 
         time.sleep(0.1)
-
+        
+    robot.sv.close()
     server.close_connection()
     
 

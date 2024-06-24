@@ -116,9 +116,13 @@ def main():
     ip_server = 'omni1.local'
     ip_server = '192.168.166.233'
     client = PCClient(ip_server, 12345)
-    msg = 'x:100,y:100,o:0,dt:0.1,t_max:5' # x[mm], y[mm], o[rad], dt[s], t_max[s
+    msg = 'x:0.1,y:0.1,o:0,dt:0.1,t_max:5' # x[mm], y[mm], o[rad], dt[s], t_max[s
     client.send(msg)
-    # client.receive_image('image.jpg')
-
+    print("Message sent")
+    time.sleep(5)
+    print("Receiving image...")
+    msg = 'x:0.2,y:0.0,o:0,dt:0.1,t_max:5'
+    client.send(msg)
+    print("Message sent")
 if __name__ == '__main__':
     main()
