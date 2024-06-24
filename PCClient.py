@@ -67,9 +67,9 @@ class PCClient:
                         break
                     print(f"Received {len(data)} bytes")
                     f.write(data)
-                    if len(data) < 1024:
-                        print("Image received")
-                        break
+                    # if len(data) < 1024:
+                    #     print("Image received")
+                    #     break
             print("Image received and saved as", image_save_path)
         except Exception as e:
             print(f"Error receiving image: {e}")

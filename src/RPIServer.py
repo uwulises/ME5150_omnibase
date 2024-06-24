@@ -80,15 +80,18 @@ class RPIServer:
             print("Image captured")
             # Send the image
             stream.seek(0)
+            total_size = stream.getbuffer().nbytes
             while True:
                 # print("Sending image data...")
                 data = stream.read(1024)
-                
-
                 if not data:
                     break
                 if data == b'':
                     break
+                if stream.tell() >= total_size:  # Check if the end of the stream is reached
+                    print("End of stream reached")
+                    break
+                
                 self.client_conn.sendall(data)
                 if len(data) < 1024:
                     print(f"Sending data chunk of size: {len(data)} bytes")
