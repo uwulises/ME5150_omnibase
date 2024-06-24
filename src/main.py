@@ -46,7 +46,7 @@ def main():
                 data = ""
                 while "OK1" not in data:
                     robot.sv.send_dt(dt)
-                    data = robot.read()
+                    data = robot.sv.read()
                     print('retorno dt:', data)
                     time.sleep(0.1)
                 
@@ -55,8 +55,8 @@ def main():
                 robot.sv.send_velocities(vels)
 
                 while "OK2" not in data:
-                    sv.send_velocities(velocities_dt)
-                    data = sv.read()
+                    robot.sv.send_velocities(velocities_dt)
+                    data = robot.sv.read()
                     print('retorno:', data)
                     time.sleep(0.1)
 
