@@ -6,7 +6,7 @@ class PCClient:
         self.server_ip = server_ip
         self.server_port = server_port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(5)
+        self.socket.settimeout(10)
         self.socket.connect((self.server_ip, self.server_port))
         print(f"Connected to server at {self.server_ip}:{self.server_port}")
 
@@ -58,6 +58,7 @@ class PCClient:
     #         print("Connection closed")
 
     def receive_image(self, image_save_path):
+        print("Receiving image...")
         try:
             with open(image_save_path, 'wb') as f:
                 while True:

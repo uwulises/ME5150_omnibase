@@ -69,15 +69,19 @@ class RPIServer:
             print(f"Error sending confirmation: {e}")
 
     def send_image(self, client_socket):
+        print('Sending image to client...')
         try:
             # Capture a single frame
             stream = io.BytesIO()
+            print("Capturing image...")
             image = self.picam2.capture_image()
             image.save(stream, format='jpeg')
 
+            print("Image captured")
             # Send the image
             stream.seek(0)
             while True:
+                print("Sending image data...")
                 data = stream.read(1024)
                 if not data:
                     break
