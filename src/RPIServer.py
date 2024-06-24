@@ -1,6 +1,6 @@
 import socket
 import time
-# from picamera2 import Picamera2
+from picamera2 import Picamera2
 import io
 
 class RPIServer:
@@ -17,6 +17,7 @@ class RPIServer:
         # Give time for AEC and AWB to settle
         time.sleep(1)
         self.picam2.set_controls({"AeEnable": False, "AwbEnable": False, "FrameRate": 1.0})
+        print("Camera configured")
         time.sleep(1)
 
     def start(self):
@@ -74,7 +75,7 @@ class RPIServer:
         self.picam2.stop()
 
 def main():
-    server_ip = '192.168.1.23'  # Replace with the IP address of your RPI
+    server_ip = '192.168.166.233'  # Replace with the IP address of your RPI
     server_port = 12345
     
     server = RPIServer(server_ip, server_port)
