@@ -6,62 +6,56 @@ class PCClient:
         self.server_ip = server_ip
         self.server_port = server_port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    
+        self.socket.settimeout(5)
+        self.socket.connect((self.server_ip, self.server_port))
+        print(f"Connected to server at {self.server_ip}:{self.server_port}")
+
+
     def _send_message(self, msg):
         try:
-            if msg.lower() == 'exit':
-                self.close()
-                return
-            
             self.socket.sendall(msg.encode())
             print(f"Sent to server: {msg}")
-            time.sleep(1)  # Espera 1 segundo antes de enviar el próximo mensaje
 
         except Exception as e:
-            if e.errno == 10057:
-                print(f"Not connected to server")
-            else:
-                print(f"Error sending data: {e}")
-            self._connect()
+            print(f"Error sending data: {e}")
+            raise TimeoutError
+            # self._close()
 
     def _receive_message(self):
         try:
             data = self.socket.recv(1024)
-            if not data:
-                print("Connection closed by server.")
-                self._connect()
-            else:
-                print(f"Received from server: {data.decode()}")
-                return data.decode()
+            print(f"Received from server: {data.decode()}")
+            return data.decode()
 
         except Exception as e:
             print(f"Error receiving data: {e}")
-            self._connect()
+            # self._close()
+            
 
-    def _connect(self):
-        print("Attempting to connect...")
-        while True:
-            try:
-                self.socket.connect((self.server_ip, self.server_port))
-                print(f"Connected to server at {self.server_ip}:{self.server_port}")
-                return
-            except Exception as e:
-                if e.errno == 10061:
-                    print(f"Connection attempt failed: Server may be down, retrying in 5 seconds...")
-                    time.sleep(5)
-                elif e.errno == 10056:
-                    print(f"Connection attempt failed: {e}, retrying in 5 seconds...")
-                    time.sleep(2)  # Espera 1 segundo antes de intentar nuevamente
-                else:
-                    print(f"Connection attempt failed: {e}")
-                    time.sleep(1)
+    # def _connect(self):
+    #     print("Attempting to connect...")
+    #     while True:
+    #         try:
+    #             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #             self.socket.connect((self.server_ip, self.server_port))
+    #             print(f"Connected to server at {self.server_ip}:{self.server_port}")
+    #             time.sleep(2) 
+    #         except Exception as e:
+    #             if e.errno == 10061:
+    #                 print(f"Connection attempt failed: Server may be down, retrying in 5 seconds...")
+    #                 time.sleep(5)
+    #             elif e.errno == 10056:
+    #                 print(f"Connection attempt failed: {e}, retrying in 5 seconds...")
+    #                 time.sleep(2)
+    #             else:
+    #                 print(f"Connection attempt failed: {e}")
+    #                 time.sleep(1)
 
-    def _close(self):
-        try:
-            self.socket.close()
-            print("Connection closed.")
-        except Exception as e:
-            print(f"Error closing connection: {e}")
+    # def _close(self):
+    #     if self.socket:
+    #         self.socket.close()
+    #         self.socket = None
+    #         print("Connection closed")
 
     # def receive_image(self, image_save_path):
     #     try:
@@ -77,22 +71,46 @@ class PCClient:
     #         self.close()  # Ensure socket is closed on error
     #         raise
 
+    def check_connection_and_fix(self): 
+        connected = False  
+        print("Connection lost, reconnecting...")  
+        while not connected:  
+            try:  
+                self.socket.connect((self.server_ip, self.server_port))  
+                connected = True  
+                print("Re-connection successful")  
+            except socket.error as e:
+                print(e)
+                print("Re-connection failed... retrying")
+                time.sleep(2)
+
     def send(self, msg):
+        print('Want to send')
+
         ready = False
-        while not ready:
-            # Intenta conectarse al servidor, si no esta conectado ya
-            if not self.socket:
-                self._connect()
-            else:
-                try:
-                    self._send_message(msg)
-                    print('msg send')
-                    msg = self._receive_message()
-                    if 'OK' in msg:
-                        ready = True
-                except KeyboardInterrupt:
-                    self._close()
-                    break
+        retries = 0
+        while not ready and retries < 3:
+            print(ready, retries)
+            try:
+                print('wants to send')
+                self._send_message(msg)
+                time.sleep(0.2)
+                print('wants to get conf')
+                data = self.socket.recv(1024)
+                if msg is not None:
+                    ready = True
+            except KeyboardInterrupt:
+                self._close()
+                break
+            # Si es un erro de timeout, se intenta reconectar
+            except socket.timeout as e:
+                print(f"Error receiving data: {e}, retrying...")
+
+            except Exception as e:
+                print(f"Error sending data: {e}")
+                self.check_connection_and_fix()
+
+            retries += 1
         
 def main():
     ip_server = 'omni1.local'

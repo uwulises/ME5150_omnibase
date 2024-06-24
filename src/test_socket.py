@@ -57,8 +57,7 @@ class TCPServer:
         print('Sending confirmation to client...')
         try:
             msg = 'OK'
-            code_msg = msg.encode()
-            self.client_conn.sendall(code_msg)
+            self.client_conn.sendall(msg.encode())
             print('Confirmation sent to client')
         except Exception as e:
             print(f"Error sending confirmation: {e}")
@@ -76,7 +75,6 @@ if __name__ == '__main__':
             if message:
                 print("Received:", message)
                 server.send_confirmation()
-                # Aquí puedes agregar lógica adicional según lo que desees hacer con el mensaje recibido
             else:
                 print('No message received or connection closed.')
 
