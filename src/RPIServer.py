@@ -83,14 +83,16 @@ class RPIServer:
             while True:
                 # print("Sending image data...")
                 data = stream.read(1024)
-                print(data.encode())
-                if data == '':
-                    break
+                
+
                 if not data:
                     break
                 if data == b'':
                     break
-                self.client_conn.sendall(data.encode())
+                self.client_conn.sendall(data)
+                if len(data) < 1024:
+                    print(f"Sending data chunk of size: {len(data)} bytes")
+                    break
 
         except Exception as e:
             print(f"Error sending image: {e}")
