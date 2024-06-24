@@ -68,6 +68,15 @@ class RPIServer:
         except Exception as e:
             print(f"Error sending confirmation: {e}")
 
+    def send_enm(self):
+        print('Sending enm to client...')
+        try: #as bytes
+            msg = b'EOM'
+            self.client_conn.sendall(msg)
+            print('ENM sent to client')
+        except Exception as e:
+            print(f"Error sending enm: {e}")
+
     def send_image(self):
         print('Sending image to client...')
         try:
@@ -76,26 +85,19 @@ class RPIServer:
             print("Capturing image...")
             image = self.picam2.capture_image()
             image.save(stream, format='jpeg')
-
             print("Image captured")
+            
             # Send the image
             stream.seek(0)
             total_size = stream.getbuffer().nbytes
             while True:
                 # print("Sending image data...")
                 data = stream.read(1024)
-                if not data:
-                    break
-                if data == b'':
-                    break
-                if stream.tell() >= total_size:  # Check if the end of the stream is reached
-                    print("End of stream reached")
-                    break
                 
-                self.client_conn.sendall(data)
-                if len(data) < 1024:
-                    print(f"Sending data chunk of size: {len(data)} bytes")
+                if stream.tell() >= total_size:  # Check if the end of the stream is reached
+                    self.send_enm()
                     break
+                self.client_conn.sendall(data)
 
         except Exception as e:
             print(f"Error sending image: {e}")
@@ -104,22 +106,23 @@ class RPIServer:
 
 def main():
     server = RPIServer('0.0.0.0', 12345)
+    dt_image = time.time()
 
     while True:
         if server.client_conn is None:
             print("No client connected. Attempting to accept a new connection...")
             server.accept_connection()
         else:
+            if time.time() - dt_image > 0.5:
+                server.send_image()
+                dt_image = time.time
+            
             message = server.receive_message()
             if message:
                 print("Received:", message)
                 server.send_confirmation()
-            else:
-                print('No message received or connection closed.')
 
-            server.send_image()
-            
-        time.sleep(1)
+        time.sleep(0.1)
 
     server.close_connection()
 

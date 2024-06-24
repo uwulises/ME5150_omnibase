@@ -63,13 +63,12 @@ class PCClient:
             with open(image_save_path, 'wb') as f:
                 while True:
                     data = self.socket.recv(1024)
-                    if not data:
+                    print(data)
+                    if data == b'EOM':
                         break
-                    print(f"Received {len(data)} bytes")
+                    # print(f"Received {len(data)} bytes")
                     f.write(data)
-                    # if len(data) < 1024:
-                    #     print("Image received")
-                    #     break
+                    
             print("Image received and saved as", image_save_path)
         except Exception as e:
             print(f"Error receiving image: {e}")
