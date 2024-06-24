@@ -90,8 +90,7 @@ class RPIServer:
 
 def main():
     server = RPIServer('0.0.0.0', 12345)
-    server.start()
-
+    
     while True:
         if server.client_conn is None:
             print("No client connected. Attempting to accept a new connection...")
