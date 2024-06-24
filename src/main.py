@@ -29,6 +29,7 @@ def main():
     robot = OmniController()
     
     while True:
+
         if server.client_conn is None:
             print("No client connected. Attempting to accept a new connection...")
             server.accept_connection()
@@ -50,7 +51,7 @@ def main():
                 while "OK1" not in data:
                     robot.sv.send_dt(dt)
                     data = robot.sv.read()
-                    print('Retorno:', data)
+                    print('Retorno from RpiPico:', data)
                     time.sleep(0.1)
                 
                 vels = robot.get_vels(qf, t_max, dt)
@@ -67,7 +68,7 @@ def main():
                 
                 
         time.sleep(0.1)
-        
+
     robot.sv.close()
     server.close_connection()
     

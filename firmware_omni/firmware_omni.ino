@@ -175,8 +175,8 @@ void loop() {
       msg = serialR.getMsg();
 
       if (msg == "") {
-        state = 2;  // Volver al estado 2 si no hay mensaje
         serialR.sendMsg("OK2");
+        state = 2;  // Volver al estado 2 si no hay mensaje
 
       } else {
         state = 3;  // Volver al estado 3 si hay mensaje
@@ -187,6 +187,7 @@ void loop() {
       state = 0;
       break;
   }
+  serialR.sendMsg(state);
 }
 
 

@@ -57,21 +57,21 @@ class PCClient:
     #         self.socket = None
     #         print("Connection closed")
 
-    def receive_image(self, image_save_path):
-        print("Receiving image...")
-        try:
-            with open(image_save_path, 'wb') as f:
-                while True:
-                    data = self.socket.recv(1024)
-                    print(data)
-                    if data == b'EOM':
-                        break
-                    # print(f"Received {len(data)} bytes")
-                    f.write(data)
+    # def receive_image(self, image_save_path):
+    #     print("Receiving image...")
+    #     try:
+    #         with open(image_save_path, 'wb') as f:
+    #             while True:
+    #                 data = self.socket.recv(1024)
+    #                 print(data)
+    #                 if data == b'EOM':
+    #                     break
+    #                 # print(f"Received {len(data)} bytes")
+    #                 f.write(data)
                     
-            print("Image received and saved as", image_save_path)
-        except Exception as e:
-            print(f"Error receiving image: {e}")
+    #         print("Image received and saved as", image_save_path)
+    #     except Exception as e:
+    #         print(f"Error receiving image: {e}")
             
 
     def check_connection_and_fix(self): 
@@ -120,9 +120,9 @@ def main():
     client.send(msg)
     print("Message sent")
     time.sleep(5)
-    print("Receiving image...")
-    msg = 'x:0.2,y:0.0,o:0,dt:0.1,t_max:5'
-    client.send(msg)
-    print("Message sent")
+    # print("Receiving image...")
+    # msg = 'x:0.2,y:0.0,o:0,dt:0.1,t_max:5'
+    # client.send(msg)
+    # print("Message sent")
 if __name__ == '__main__':
     main()
