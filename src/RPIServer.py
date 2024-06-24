@@ -1,9 +1,9 @@
 import socket
 import time
-from picamera2 import Picamera2
+# from picamera2 import Picamera2
 import io
 
-class RPIServer:
+class RPIController:
     def __init__(self, host, port):
         self.host = host
         self.port = port
@@ -16,15 +16,15 @@ class RPIServer:
 
         print(f'Server is listening on {self.host}:{self.port}...')
 
-        self.picam2 = Picamera2()
-        self.picam2.configure("still")
-        self.picam2.start()
+        # self.picam2 = Picamera2()
+        # self.picam2.configure("still")
+        # self.picam2.start()
 
-        # Give time for AEC and AWB to settle
-        time.sleep(1)
-        self.picam2.set_controls({"AeEnable": False, "AwbEnable": False, "FrameRate": 1.0})
-        print("Camera configured")
-        time.sleep(1)
+        # # Give time for AEC and AWB to settle
+        # time.sleep(1)
+        # self.picam2.set_controls({"AeEnable": False, "AwbEnable": False, "FrameRate": 1.0})
+        # print("Camera configured")
+        # time.sleep(1)
 
     def accept_connection(self):
         try:
@@ -68,59 +68,68 @@ class RPIServer:
         except Exception as e:
             print(f"Error sending confirmation: {e}")
 
-    def send_enm(self):
-        print('Sending enm to client...')
-        try: #as bytes
-            msg = b'EOM'
-            self.client_conn.sendall(msg)
-            print('ENM sent to client')
-        except Exception as e:
-            print(f"Error sending enm: {e}")
+    # def send_enm(self):
+    #     print('Sending enm to client...')
+    #     try: #as bytes
+    #         msg = b'EOM'
+    #         self.client_conn.sendall(msg)
+    #         print('ENM sent to client')
+    #     except Exception as e:
+    #         print(f"Error sending enm: {e}")
 
-    def send_image(self):
-        print('Sending image to client...')
-        try:
-            # Capture a single frame
-            stream = io.BytesIO()
-            print("Capturing image...")
-            image = self.picam2.capture_image()
-            image.save(stream, format='jpeg')
-            print("Image captured")
-            
-            # Send the image
-            stream.seek(0)
-            total_size = stream.getbuffer().nbytes
-            while True:
-                # print("Sending image data...")
-                data = stream.read(1024)
+    # def send_image(self):
+    #     print('Sending image to client...')
+    #     try:
+    #         # Capture a single frame
+    #         stream = io.BytesIO()
+    #         print("Capturing image...")
+    #         image = self.picam2.capture_image()
+    #         image.save(stream, format='jpeg')
+    #         print("Image captured")
+
+    #         # Send the image
+    #         stream.seek(0)
+    #         total_size = stream.getbuffer().nbytes
+    #         while True:
+    #             # print("Sending image data...")
+    #             data = stream.read(1024)
                 
-                if stream.tell() >= total_size:  # Check if the end of the stream is reached
-                    self.send_enm()
-                    break
-                self.client_conn.sendall(data)
+    #             if stream.tell() >= total_size:  # Check if the end of the stream is reached
+    #                 self.send_enm()
+    #                 break
+    #             self.client_conn.sendall(data)
 
-        except Exception as e:
-            print(f"Error sending image: {e}")
-            raise
+    #     except Exception as e:
+    #         print(f"Error sending image: {e}")
+    #         raise
 
+def split_message(message):
+    assert isinstance(message, str)
+    
+    x, y = message.split(',')
+    x = x.split(':')[-1]
+    y = y.split(':')[-1]
+    return x, y
+def obtain_trajectory():
 
 def main():
-    server = RPIServer('0.0.0.0', 12345)
-    dt_image = time.time()
+    server = RPIController('0.0.0.0', 12345)
+    # dt_image = time.time()
 
     while True:
         if server.client_conn is None:
             print("No client connected. Attempting to accept a new connection...")
             server.accept_connection()
         else:
-            if time.time() - dt_image > 0.5:
-                server.send_image()
-                dt_image = time.time
+            # if time.time() - dt_image > 0.5:
+            #     server.send_image()
+            #     dt_image = time.time
             
             message = server.receive_message()
             if message:
                 print("Received:", message)
                 server.send_confirmation()
+
 
         time.sleep(0.1)
 

@@ -3,6 +3,13 @@ import matplotlib.pyplot as plt
 
 class GetTrajectory:
     def __init__(self, qf, T_max, num_points=None, dt=None):
+        """
+        qf: List of final positions
+        T_max: Maximum time to reach the final position
+        num_points: Number of points to generate the trajectory
+        dt: Time step to generate the trajectory
+        """
+        
         self.q0 = np.array([0, 0, 0])
         assert len(qf) == len(self.q0), f"q0 and qf must have the same length: {len(self.q0)}"
         self.qf = np.array(qf)
