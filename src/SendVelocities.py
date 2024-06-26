@@ -36,7 +36,6 @@ class SendVelocities:
         msg = ''
         for vels in velocities:
             msg += self.format_vel(vels)
-
         self.send(msg)
         print("Path sent")
 
