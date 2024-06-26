@@ -43,26 +43,29 @@ def main():
 
                 x, y, o, dt, t_max = robot.split_message(message)
                 qf = [x, y, o]
-                
+                vels = robot.get_vels(qf, t_max, dt)
+
                 print('-Communication with RpiPico-')
 
-                # Send dt to Arduino
+                # Send dt to RpiPico
                 data = ""
                 while "OK1" not in data:
-                    robot.sv.send_dt(dt)
                     data = robot.sv.read()
                     print('Retorno from RpiPico:', data)
                     time.sleep(0.1)
-                
-                vels = robot.get_vels(qf, t_max, dt)
+                    if "DT" in data:
+                        print('Sending dt to RpiPico:', dt)
+                        robot.sv.send_dt(dt)
 
-                # Send velocities to Arduino
+                # Send velocities to RpiPico
                 while "OK2" not in data:
-                    robot.sv.send_velocities(vels)
                     data = robot.sv.read()
                     print('Retorno:', data)
                     time.sleep(0.1)
-
+                    if "DATA" in data:
+                        print('Sending velocities to RpiPico:', vels)
+                        robot.sv.send_velocities(vels)
+                    
                 print('-END Communication with RpiPico-')
                 server.send_confirmation()
                 
