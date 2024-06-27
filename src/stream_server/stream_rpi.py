@@ -9,14 +9,13 @@ from aiortc.contrib.media import MediaPlayer, MediaRelay
 ROOT = os.path.dirname(__file__)
 HOST = "0.0.0.0"
 PORT = 8080
-
 relay = None
 webcam = None
 
 def create_local_tracks():
     global relay, webcam
     if relay is None:
-        options = {"framerate": "30", "video_size": "320x240"}
+        options = {"framerate": "15", "video_size": "640x480"}
         webcam = MediaPlayer("/dev/video0", format="v4l2", options=options)
         relay = MediaRelay()
     return relay.subscribe(webcam.video)

@@ -114,21 +114,44 @@ class GetTrajectory:
         self.trajectory = np.round(self.trajectory, 3)
         return self.trajectory, self.velocities
 
+def format_vel(vels):
+    # solo 3 decimales
+    vx = "{:.4f}".format(vels[0])
+    vy = "{:.4f}".format(vels[1])
+    w = "{:.4f}".format(vels[2])
+    return f"{vx},{vy},{w};"
+
+def send_velocities(velocities: list):
+    assert velocities.shape[1] == 3, "Path must have 3 columns"
+
+    msg = ''
+    for vels in velocities:
+        msg += format_vel(vels)
+    print(msg)
+        
 # Ejemplo de uso
 if __name__ == "__main__":
     qf = [0.3, 1, 0.1]  # [Vx, Vy, w]
-    T_max = 10.0  # Tiempo máximo
+    T_max = 2.0  # Tiempo máximo
 
     # Opción 1: Generar trayectoria en base a número de puntos
     num_points = 50
     jtraj_points = GetTrajectory(qf, T_max, num_points=num_points)
     _, velocities_points = jtraj_points.get_trajectory()
     print("Velocidades (num_points):\n", velocities_points)
-    jtraj_points.plot_trajectory()
+    # jtraj_points.plot_trajectory()
 
     # Opción 2: Generar trayectoria en base a dt
-    dt = 0.5
+    dt = 0.2
     jtraj_dt = GetTrajectory(qf, T_max, dt=dt)
     _, velocities_dt = jtraj_dt.get_trajectory()
     print("Velocidades (dt):\n", velocities_dt)
-    jtraj_dt.plot_trajectory()
+    send_velocities(velocities_dt)
+    distx = 0
+    disty = 0
+    for vx, vy, w in velocities_dt:
+        distx += vx * dt
+        disty += vy * dt
+    print("Distancia recorrida en x:", distx)
+    print("Distancia recorrida en y:", disty)
+    # jtraj_dt.plot_trajectory()

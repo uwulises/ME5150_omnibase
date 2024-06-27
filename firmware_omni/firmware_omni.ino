@@ -29,10 +29,10 @@ float motorSpeed[] = { 0.0, 0.0, 0.0, 0.0 };
 float controlSpeed[NUM_ENCODERS];
 
 PIDController pid_controllers[NUM_ENCODERS] = {
-  PIDController(0.01, 0.0001, 0.0),
-  PIDController(0.01, 0.0001, 0.0),
-  PIDController(0.01, 0.0001, 0.0),
-  PIDController(0.01, 0.0001, 0.0),
+  PIDController(0.00001, 0.0000000001, 0.0),
+  PIDController(0.00001, 0.0000000001, 0.0),
+  PIDController(0.00001, 0.0000000001, 0.0),
+  PIDController(0.00001, 0.0000000001, 0.0),
 };
 
 // IGNORE
@@ -172,7 +172,6 @@ void loop() {
         apply_PID();
         break;
       }
-
       msg = serialR.getMsg();
 
       if (msg == "") {
