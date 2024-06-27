@@ -23,6 +23,7 @@ class OmniController:
         gt = GetTrajectory(qf, T_max, dt=dt)
         _, velocities_dt = gt.get_trajectory()
         return velocities_dt
+    
 
 def main():
     server = RPIServer('0.0.0.0', 12345)
