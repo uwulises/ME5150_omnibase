@@ -100,8 +100,8 @@ def main():
                 print('-END Communication with RpiPico-')
                 server.send_confirmation()
                 
-        time.sleep(0.1)
-
+        time.sleep(10)
+        print("Waiting for next message...")
     robot.sv.close()
     server.close_connection()
     print("Done")
@@ -112,7 +112,6 @@ def main_local():
     robot.calculate_vels(message)
     robot.send_data("DT")
     robot.send_data("DATA")
-    
     print("Done")
 
 try:
