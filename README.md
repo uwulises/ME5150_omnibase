@@ -17,6 +17,7 @@ conda activate omnibase
 ```
 5. Install all required packages. This may take a while.
 ```sh
+cd client
 pip install -r requirements.txt
 ```
 
