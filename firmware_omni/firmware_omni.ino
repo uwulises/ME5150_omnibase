@@ -29,10 +29,10 @@ float motorSpeed[] = { 0.0, 0.0, 0.0, 0.0 };
 float controlSpeed[NUM_ENCODERS];
 
 PIDController pid_controllers[NUM_ENCODERS] = {
-  PIDController(0.01, 0.0001, 0.0),
-  PIDController(0.01, 0.0001, 0.0),
-  PIDController(0.01, 0.0001, 0.0),
-  PIDController(0.01, 0.0001, 0.0),
+  PIDController(0.00001, 0.0000000001, 0.0),
+  PIDController(0.00001, 0.0000000001, 0.0),
+  PIDController(0.00001, 0.0000000001, 0.0),
+  PIDController(0.00001, 0.0000000001, 0.0),
 };
 
 // IGNORE
@@ -67,7 +67,8 @@ void isrB3() {
 SerialReceiver serialR;
 float dt = 0;
 String msg = "";
-
+String msg1 = "";
+String act = "";
 long unsigned int dt_ready = 3000;
 long unsigned int last_ready = 0;
 int state = 0;
@@ -110,9 +111,9 @@ void loop() {
     // Estado 0: Si no hay comunicación serie, detener los motores
     case 0:
       if (!Serial) {
-        stop_motors();        // Detener los motores
-        state = 0;            // Mantener en estado 0 si no hay comunicación serie
-      } else {                // Si hay comunicación serie, pasar al estado 1
+        stop_motors();  // Detener los motores
+        state = 0;      // Mantener en estado 0 si no hay comunicación serie
+      } else {          // Si hay comunicación serie, pasar al estado 1
         dt = 0;
         msg = "";
         state = 1;  // Pasar al estado 1 si hay comunicación serie
@@ -120,28 +121,30 @@ void loop() {
       break;
 
     // Estado 1: Obtener dt del monitor serie
-    case 1: 
+    case 1:
       if (millis() - last_ready >= dt_ready) {
         last_ready = millis();
-        serialR.sendMsg("waiting dt");
-        serialR.clearSerialBuffer();
+        serialR.sendMsg("DT");
       }
+
       serialR.receiveData();
       dt = serialR.getMsg().toFloat();
 
       if (dt != 0) {
-        serialR.sendMsg("Dt received");
+
+        serialR.sendMsg("OK1");
         state = 2;  // Pasar al estado 2 después de enviar "Dt"
         serialR.setMsg();
       }
       break;
 
     // Estado 2: Recibir trayectoria a traves del monitor serie
-    case 2: 
+    case 2:
+      stop_motors();
       if (millis() - last_ready >= dt_ready) {  // Si ha pasado dt_ready ms
         last_ready = millis();
-        serialR.sendMsg("waiting data");        // Enviar "waiting data"
-        serialR.clearSerialBuffer();            // y limpiar el buffer serie
+        serialR.sendMsg("DATA");  // Enviar "waiting data"
+        // serialR.clearSerialBuffer();            // y limpiar el buffer serie
       }
       serialR.receiveData();
       msg = serialR.getMsg();
@@ -151,8 +154,7 @@ void loop() {
       break;
 
     // Estado 3: Obtener la siguiente acción para el robot
-    case 3: 
-
+    case 3:
       // Procesar el mensaje del monitor serie
       serialR.processMsg();
       serialR.splitAction();
@@ -163,20 +165,18 @@ void loop() {
       break;
 
     // Estado 4: Mover el robot
-    case 4: 
-
+    case 4:
       // Si ha pasado menos que dt
       if (millis() - last_ready < dt * 1000) {
         omni_IK(serialR.Vx, serialR.Vy, serialR.w);  // en metros y rads/seg, Vx hacia adelante
         apply_PID();
         break;
       }
-      
       msg = serialR.getMsg();
 
       if (msg == "") {
-        state = 2;  // Volver al estado 2 si no hay mensaje
-        serialR.sendMsg("Traj");
+        serialR.sendMsg("OK2");
+        state = 1;  // Volver al estado 2 si no hay mensaje
 
       } else {
         state = 3;  // Volver al estado 3 si hay mensaje
@@ -219,13 +219,13 @@ bool withinTolerance(float signals[]) {
 }
 
 void apply_PID() {
-  if (millis() - t1_pid >= dt_pid) {  //} && !withinTolerance(controlSpeed)) {
-    t1_pid = millis();
-    for (int i = 0; i < NUM_ENCODERS; i++) {
-      controlSpeed[i] = pid_controllers[i].compute(motorSpeed[i]);
-      set_motor_vel(i, controlSpeed[i]);
-    }
+  // if (millis() - t1_pid >= dt_pid) {  //} && !withinTolerance(controlSpeed)) {
+  // t1_pid = millis();
+  for (int i = 0; i < NUM_ENCODERS; i++) {
+    controlSpeed[i] = pid_controllers[i].compute(motorSpeed[i]);
+    set_motor_vel(i, controlSpeed[i]);
   }
+  // }
 }
 
 void set_motor_vel(int motor, int pwm) {  // vel: steps per sec
