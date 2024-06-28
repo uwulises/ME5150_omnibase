@@ -4,7 +4,7 @@ import json
 from src.webRTC import WebRTCController
 from src.videoShow import VideoShow
 
-class RobotClient:
+class StreamClient:
     def __init__(self, address, port=5000, portVideo=8080):
         self.address = address
         self.port = port
@@ -88,7 +88,7 @@ class VideoShow():
 def main():
     import time
     import cv2
-    robot = RobotClient("192.168.166.233")
+    robot = StreamClient("192.168.166.233")
 
     # Show video
     robot.showVideo()
