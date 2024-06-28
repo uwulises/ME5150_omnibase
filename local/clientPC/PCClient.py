@@ -123,6 +123,6 @@ def main():
     # print("Receiving image...")
     # msg = 'x:0.2,y:0.0,o:0,dt:0.1,t_max:5'
     # client.send(msg)
-    # print("Message sent")
+    print("Message sent")
 if __name__ == '__main__':
     main()

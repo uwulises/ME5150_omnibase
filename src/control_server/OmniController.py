@@ -1,8 +1,5 @@
 from GetTrajectory import GetTrajectory
 from SendVelocities import SendVelocities
-import numpy as np
-import time
-from RPIServer import RPIServer
 
 class OmniController:
     def __init__(self, port = "/dev/ttyACM0"):
@@ -75,38 +72,6 @@ class OmniController:
         return data
 
 def main():
-    server = RPIServer('0.0.0.0', 12345)
-    robot = OmniController()
-    track_dt = False
-    while True:
-
-        if server.client_conn is None:
-            print("No client connected. Attempting to accept a new connection...")
-            server.accept_connection()
-        else:
-            
-            message = server.receive_message()
-            if message:
-                print("Received from PC:", message)
-                server.send_confirmation()
-
-                robot.calculate_vels(message)
-                
-                print('-Communication with RpiPico-')
-                
-                robot.send_data("DT")
-                robot.send_data("DATA")
-               
-                print('-END Communication with RpiPico-')
-                server.send_confirmation()
-                
-        time.sleep(10)
-        print("Waiting for next message...")
-    robot.sv.close()
-    server.close_connection()
-    print("Done")
-
-def main_local():
     robot = OmniController(port = "COM6")
     message = "x:0.1,y:0.0,o:0.0,dt:0.1,t_max:1.0"
     robot.calculate_vels(message)
@@ -114,12 +79,5 @@ def main_local():
     robot.send_data("DATA")
     print("Done")
 
-try:
+if __name__ == '__main__':
     main()
-except Exception as e:
-    main_local()
-finally:
-    print("Keyboard Interrupt")
-    robot.sv.close()
-    server.close_connection()
-    print("Done")
