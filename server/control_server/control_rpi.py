@@ -1,8 +1,8 @@
 import numpy as np
 import time
 
-from RPIServer import RPIServer
-from OmniController import OmniController
+from rpiServer import RPIServer
+from omniController import OmniController
 
 server = RPIServer('0.0.0.0', 12345)
 robot = OmniController()

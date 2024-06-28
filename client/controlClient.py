@@ -10,7 +10,6 @@ class ControlClient:
         self.socket.connect((self.server_ip, self.server_port))
         print(f"Connected to server at {self.server_ip}:{self.server_port}")
 
-
     def _send_message(self, msg):
         try:
             self.socket.sendall(msg.encode())

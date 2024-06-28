@@ -18,7 +18,6 @@ class VideoBuffer():
         return self.started 
 
     async def start(self):
-        print("start")
         self.started = True
         self.startTask = asyncio.current_task()
         self.frame = await self.track.recv()

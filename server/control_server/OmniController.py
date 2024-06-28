@@ -1,5 +1,5 @@
-from GetTrajectory import GetTrajectory
-from SendVelocities import SendVelocities
+from getTrajectory import GetTrajectory
+from sendVelocities import SendVelocities
 
 class OmniController:
     def __init__(self, port = "/dev/ttyACM0"):
