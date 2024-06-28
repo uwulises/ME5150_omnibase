@@ -4,10 +4,11 @@ import numpy as np
 import time
 from RPIServer import RPIServer
 
-
 class OmniController:
     def __init__(self, port = "/dev/ttyACM0"):
         self.sv = SendVelocities(port = port)
+        self.dt = 0
+        self.vels = []
             
     def split_message(self, message):
         assert isinstance(message, str), "Message must be a string."       
@@ -19,16 +20,64 @@ class OmniController:
         t_max = float(t_max.split(':')[-1])
         return x, y, o, dt, t_max
 
-    def get_vels(self, qf, T_max, dt):
-        gt = GetTrajectory(qf, T_max, dt=dt)
+    def update_vels(self, vels):
+        self.vels = vels
+
+    def update_dt(self, dt):
+        self.dt = dt
+
+    def calculate_vels(self, message:str):
+        x, y, o, dt, t_max = self.split_message(message)
+
+        # update dt
+        self.update_dt(dt)
+
+        # calculate velocities
+        qf = [x, y, o]
+        gt = GetTrajectory(qf, t_max, dt = self.dt)
         _, velocities_dt = gt.get_trajectory()
-        return velocities_dt
-    
+        # update velocities
+        self.update_vels(velocities_dt)
+
+    def send_dt(self):
+        assert self.dt > 0, "dt must be greater than 0."
+        self.sv.send_dt(self.dt)
+
+    def send_velocities(self):
+        assert len(self.vels) > 0, "Velocities must be calculated first."
+        self.sv.send_velocities(self.vels)
+
+    def send_data(self, data:str):
+        if data == "DATA":
+            print('Sending velocities to RpiPico')
+            self.wait_request("DATA")
+            self.send_velocities()
+            self.wait_confirmation("OK2")
+
+        elif data == "DT":
+            print('Sending dt to RpiPico')
+            self.wait_request("DT")
+            self.send_dt()
+            self.wait_confirmation("OK1")
+
+    def wait_request(self, request_msg:str):
+        data = ""
+        while request_msg not in data:
+            data = self.sv.read()
+            time.sleep(0.1)
+        return data
+
+    def wait_confirmation(self, confirmation_msg:str):
+        data = ""
+        while confirmation_msg not in data:
+            data = self.sv.read()
+            time.sleep(0.1)
+        return data
 
 def main():
     server = RPIServer('0.0.0.0', 12345)
     robot = OmniController()
-    
+    track_dt = False
     while True:
 
         if server.client_conn is None:
@@ -38,59 +87,40 @@ def main():
             
             message = server.receive_message()
             if message:
-
                 print("Received from PC:", message)
                 server.send_confirmation()
 
-                x, y, o, dt, t_max = robot.split_message(message)
-                qf = [x, y, o]
-                vels = robot.get_vels(qf, t_max, dt)
-
+                robot.calculate_vels(message)
+                
                 print('-Communication with RpiPico-')
-
-                # Send dt to RpiPico
-                data = ""
-                while "OK1" not in data:
-                    data = robot.sv.read()
-                    print('Retorno from RpiPico:', data)
-                    time.sleep(0.1)
-                    if "DT" in data:
-                        print('Sending dt to RpiPico:', dt)
-                        robot.sv.send_dt(dt)
-
-                # Send velocities to RpiPico
-                while "OK2" not in data:
-                    data = robot.sv.read()
-                    print('Retorno:', data)
-                    time.sleep(0.1)
-                    if "DATA" in data:
-                        print('Sending velocities to RpiPico:', vels)
-                        robot.sv.send_velocities(vels)
-                    
+                
+                robot.send_data("DT")
+                robot.send_data("DATA")
+               
                 print('-END Communication with RpiPico-')
                 server.send_confirmation()
-                
                 
         time.sleep(0.1)
 
     robot.sv.close()
     server.close_connection()
+    print("Done")
+
+def main_local():
+    robot = OmniController(port = "COM6")
+    message = "x:0.1,y:0.0,o:0.0,dt:0.1,t_max:1.0"
+    robot.calculate_vels(message)
+    robot.send_data("DT")
+    robot.send_data("DATA")
     
+    print("Done")
 
-    # sv.read_all()
-    # gt = GetTrajectory(qf, T_max, dt=dt)
-    # _, velocities_dt = gt.get_trajectory()
-    # print("Velocidades (dt):\n", velocities_dt)
-
-    # data = ""
-    # sv.send_velocities(velocities_dt)
-    # while "Traj" not in data:
-    #     # sv.send_velocities(velocities_dt)
-    #     data = sv.read()
-    #     print('retorno:', data)
-    #     time.sleep(0.1)
-
-    # sv.close()
-    # print("Done")
-
-main()
+try:
+    main()
+except Exception as e:
+    main_local()
+finally:
+    print("Keyboard Interrupt")
+    robot.sv.close()
+    server.close_connection()
+    print("Done")
