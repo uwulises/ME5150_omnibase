@@ -84,3 +84,21 @@ class VideoShow():
         self.show.clear()
         self.cameraThread.join()
         
+def main():
+    import time
+    import cv2
+    robot = RobotClient("192.168.166.233")
+
+    # Show video
+    robot.showVideo()
+    time.sleep(10)
+    robot.stopVideo()
+
+    # Get frame
+    img = robot.get_frame()
+    cv2.imwrite("test.jpg", img)
+
+    robot.closeWebRTC()
+
+if __name__ == "__main__":
+    main()

@@ -1,7 +1,7 @@
 import socket
 import time
 
-class PCClient:
+class ControlClient:
     def __init__(self, server_ip, server_port):
         self.server_ip = server_ip
         self.server_port = server_port
@@ -31,49 +31,6 @@ class PCClient:
             print(f"Error receiving data: {e}")
             # self._close()
             
-
-    # def _connect(self):
-    #     print("Attempting to connect...")
-    #     while True:
-    #         try:
-    #             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #             self.socket.connect((self.server_ip, self.server_port))
-    #             print(f"Connected to server at {self.server_ip}:{self.server_port}")
-    #             time.sleep(2) 
-    #         except Exception as e:
-    #             if e.errno == 10061:
-    #                 print(f"Connection attempt failed: Server may be down, retrying in 5 seconds...")
-    #                 time.sleep(5)
-    #             elif e.errno == 10056:
-    #                 print(f"Connection attempt failed: {e}, retrying in 5 seconds...")
-    #                 time.sleep(2)
-    #             else:
-    #                 print(f"Connection attempt failed: {e}")
-    #                 time.sleep(1)
-
-    # def _close(self):
-    #     if self.socket:
-    #         self.socket.close()
-    #         self.socket = None
-    #         print("Connection closed")
-
-    # def receive_image(self, image_save_path):
-    #     print("Receiving image...")
-    #     try:
-    #         with open(image_save_path, 'wb') as f:
-    #             while True:
-    #                 data = self.socket.recv(1024)
-    #                 print(data)
-    #                 if data == b'EOM':
-    #                     break
-    #                 # print(f"Received {len(data)} bytes")
-    #                 f.write(data)
-                    
-    #         print("Image received and saved as", image_save_path)
-    #     except Exception as e:
-    #         print(f"Error receiving image: {e}")
-            
-
     def check_connection_and_fix(self): 
         connected = False  
         print("Connection lost, reconnecting...")  
@@ -115,7 +72,7 @@ class PCClient:
 def main():
     ip_server = 'omni1.local'
     ip_server = '192.168.166.233'
-    client = PCClient(ip_server, 12345)
+    client = ControlClient(ip_server, 12345)
     msg = 'x:0.1,y:0.1,o:0,dt:1,t_max:5' # x[mm], y[mm], o[rad], dt[s], t_max[s
     client.send(msg)
     print("Message sent")
