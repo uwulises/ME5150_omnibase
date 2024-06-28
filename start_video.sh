@@ -2,5 +2,11 @@
 screen -dmS video bash -c '
   workon me5150
   cd ~/ME5150_omnibase/src/stream_server
-  python3 stream_rpi.py
+  echo "Iniciando script de Python..."
+  if python3 stream_rpi.py >> stream_rpi.log 2>&1; then
+    echo "El script de Python se está ejecutando."
+  else
+    echo "Error al iniciar el script de Python."
+    echo "Revisa el log en stream_rpi.log"
+  fi
 '

@@ -1,7 +1,8 @@
 import requests
 import json
-from webRTC import WebRTCController
-from videoShow import VideoShow
+
+from src.webRTC import WebRTCController
+from src.videoShow import VideoShow
 
 class RobotClient:
     def __init__(self, address, port=5000, portVideo=8080):
@@ -14,7 +15,7 @@ class RobotClient:
 
     def connect(self):
         if self.connected:
-            print("already connected :)")
+            print("Already connected :)")
             return
 
         url = f"{self.base_url}/connect"
@@ -84,3 +85,21 @@ class VideoShow():
         self.show.clear()
         self.cameraThread.join()
         
+def main():
+    import time
+    import cv2
+    robot = RobotClient("192.168.166.233")
+
+    # Show video
+    robot.showVideo()
+    time.sleep(10)
+    robot.stopVideo()
+
+    # Get frame
+    img = robot.get_frame()
+    # cv2.imwrite("test.jpg", img)
+
+    robot.closeWebRTC()
+
+if __name__ == "__main__":
+    main()

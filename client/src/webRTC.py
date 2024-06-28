@@ -1,16 +1,16 @@
 import asyncio
+import logging
+import threading
+from aiortc.contrib.media import MediaStreamTrack
+from aiortc.contrib.signaling import BYE, add_signaling_arguments, create_signaling
 from aiortc import (
     RTCPeerConnection,
     RTCConfiguration
 )
-import logging
-from .videoShow import VideoShow, VideoBuffer
-from .signaling import SignalingServer
-from aiortc.contrib.media import MediaStreamTrack
-from aiortc.contrib.signaling import BYE, add_signaling_arguments, create_signaling
 from av import VideoFrame
-import threading
 
+from src.videoShow import VideoShow, VideoBuffer
+from src.signaling import SignalingServer
 
 
 class WebRTCController():
@@ -32,7 +32,6 @@ class WebRTCController():
 
         print("Ending WebRTC connection")
         self.loop.run_until_complete(self.pc.close())
-        print("ended")
         
 
     def connect(self):
@@ -116,10 +115,8 @@ class SimpleVideoTrack(MediaStreamTrack):
         frame = await self.track.recv()
         return frame
 
-
-
-
 if __name__ == "__main__":
-    #logging.basicConfig(level=logging.DEBUG)
-    user = WebRTCController("rainbowdash.local")
+    # logging.basicConfig(level=logging.DEBUG)
+    user = WebRTCController("192.168.166.233")
+    # user = WebRTCController("omni1.local")
     user.start()
