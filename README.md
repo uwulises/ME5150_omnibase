@@ -1,5 +1,95 @@
 # ME5150_omnibase
 
+## On your PC
+
+1. Open miniconda console.
+2. Pick a folder to save this repo, from now we'll call it ```BASE_PATH```.
+3. Clone this repository.
+```sh
+cd BASE_PATH
+git clone https://github.com/uwulises/ME5150_omnibase.git
+```
+4. Create virtual environment named "omnibase".
+```sh
+cd client
+conda env create -n omnibase
+conda activate omnibase
+```
+5. Install all required packages. This may take a while.
+```sh
+pip install -r requirements.txt
+```
+
+Now you just need to go to VSCode and execute some file, for example: streamClient.py or controlClient.py
+
+## On Raspberry Pi 4
+1. Open a Command Prompt, like Windows PowerShell.
+2. Connect to Rpi4 via ssh.
+```sh
+ssh robotica@{ROBOT NAME}.local
+```
+{ROBOT NAME} can be ```omni1```, ```omni2``` or ```omni3```. If it doesn't work, then use the IP address 192.168.100.XXX (ask for it!) of your mobile base.  
+*Ask the password.* 
+
+```sh
+ssh robotica@{IP ADDRESS}
+```
+
+3. Now that you're on Raspberry Pi, use Ubuntu commands like ```cd``` or ```ls``` to navigate.
+4. To **initialize the stream and control** the robot, execute:
+```sh
+cd ME5150_omnibase
+./start_video.sh
+./start_control.sh
+```
+And it's ready.
+
+## Server configuration (rpi4)
+
+1. Open a Command Prompt, like Windows PowerShell.
+2. Connect to Rpi4 via ssh.
+```sh
+ssh robotica@{ROBOT NAME}.local
+```
+{ROBOT NAME} can be ```omni1```, ```omni2``` or ```omni3```. If it doesn't work, then use the IP address 192.168.100.XXX of the mobile base, use a program like Angry IP Scanner to search. 
+*Ask the password.* 
+
+```sh
+ssh robotica@{IP ADDRESS}
+```
+
+3. Configura la Raspberry Pi. Preguntar por configuracioneees.
+```sh
+sudo raspi-config
+```
+
+4. Update packages. This may take a while.
+```sh
+sudo apt update
+sudo apt upgrade -y 
+```
+
+5. Install Git.
+```sh
+sudo apt install git
+```
+
+6. Clone this repository.
+```sh
+git clone https://github.com/uwulises/ME5150_omnibase.git
+```
+
+7. Execute ```install_server.sh``` to install all
+```sh
+cd ME5150_omnibase/server
+chmod +x install_server.sh
+./install_server.sh
+```
+8. It's ready!
+
+
+---
+---
 TO DO LIST
 <https://www.raspberrypi.com/documentation/computers/os.html#python-on-raspberry-pi>
 ### OpenCV
