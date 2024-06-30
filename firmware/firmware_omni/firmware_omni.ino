@@ -126,7 +126,7 @@ void loop() {
         last_ready = millis();
         serialR.sendMsg("DT");
       }
-
+      stop_motors();
       serialR.receiveData();
       dt = serialR.getMsg().toFloat();
 
