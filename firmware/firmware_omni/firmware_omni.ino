@@ -143,8 +143,7 @@ void loop() {
       stop_motors();
       if (millis() - last_ready >= dt_ready) {  // Si ha pasado dt_ready ms
         last_ready = millis();
-        serialR.sendMsg("DATA");  // Enviar "waiting data"
-        // serialR.clearSerialBuffer();            // y limpiar el buffer serie
+        serialR.sendMsg("DATA");                // Enviar "waiting data"
       }
       serialR.receiveData();
       msg = serialR.getMsg();
