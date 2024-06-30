@@ -1,6 +1,6 @@
 from getTrajectory import GetTrajectory
 from sendVelocities import SendVelocities
-
+import time
 class OmniController:
     def __init__(self, port = "/dev/ttyACM0"):
         self.sv = SendVelocities(port = port)

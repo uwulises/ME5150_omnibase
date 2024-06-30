@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+
 
 class GetTrajectory:
     def __init__(self, qf, T_max, num_points=None, dt=None):
@@ -93,6 +93,7 @@ class GetTrajectory:
         return trajectory, velocities
 
     def plot_trajectory(self):
+        import matplotlib.pyplot as plt
         if self.num_points is not None:
             t = np.linspace(0, self.T_max, self.num_points)
         else:

@@ -1,12 +1,23 @@
 #!/bin/bash
-screen -dmS video bash -c '
+
+screen_name="control"
+
+# Si ya existe un proceso screen llamado "$screen_name", matarlo
+if screen -list | grep -q "$screen_name"; then
+  screen -S "$screen_name" -X quit
+  echo "Matando proceso screen anterior..."
+fi
+
+# Iniciar screen y ejecutar el script de Python
+screen -dmS "$screen_name" bash -c '
   workon me5150
-  cd ~/ME5150_omnibase/src/control_server
-  echo "Iniciando script de Python: control_rpi..."
-  if python3 control_rpi.py >> control_rpi.log 2>&1; then
-    echo "El script de Python se está ejecutando."
-  else
-    echo "Error al iniciar el script de Python."
-    echo "Revisa el log en control_rpi.log"
-  fi
+  echo "Iniciando script de Python..."
+  python3 /home/robotica/ME5150_omnibase/server/control_server/control_rpi.py
 '
+
+# Verificar que se haya creado el screen
+if screen -list | grep -q "$screen_name"; then
+  echo "Screen $screen_name creado correctamente."
+else
+  echo "Error al crear screen."
+fi
