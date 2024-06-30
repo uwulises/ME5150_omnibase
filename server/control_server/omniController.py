@@ -35,6 +35,7 @@ class OmniController:
         _, velocities_dt = gt.get_trajectory()
         # update velocities
         self.update_vels(velocities_dt)
+        print(qf, dt)
 
     def send_dt(self):
         assert self.dt > 0, "dt must be greater than 0."

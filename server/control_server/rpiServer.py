@@ -14,7 +14,6 @@ class RPIServer:
         self.server_socket.listen(1)  # Acepta una sola conexión
 
         print(f'Server is listening on {self.host}:{self.port}...')
-
     def accept_connection(self):
         try:
             conn, addr = self.server_socket.accept()
@@ -56,20 +55,39 @@ class RPIServer:
             print('Confirmation sent to client')
         except Exception as e:
             print(f"Error sending confirmation: {e}")
+    
+    def is_client_connected(self):
+        if self.client_conn:
+            try:
+                data = self.client_conn.recv(1024)
+                if data == b'':
+                    print("Client disconnected")
+                    return False
+                return True
+            except BlockingIOError:
+                # No data available, client is still connected
+                return True
+            except ConnectionResetError:
+                print("Connection reset by peer")
+                return False
+            except Exception as e:
+                print(f"Error checking client connection: {e}")
+                return False
+        return False
 
 def main():
     server = RPIServer('0.0.0.0', 12345)
     while True:
-        if server.client_conn is None:
+        if not server.is_client_connected():
             print("No client connected. Attempting to accept a new connection...")
             server.accept_connection()
-        else:            
+        else:     
+            print("Receiving message...")       
             message = server.receive_message()
             if message:
                 print("Received:", message)
+                # time.sleep(5)
                 server.send_confirmation()
-        time.sleep(0.1)
-
     server.close_connection()
 
 if __name__ == '__main__':
