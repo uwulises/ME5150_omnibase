@@ -74,7 +74,14 @@ class OmniController:
 
 def main():
     robot = OmniController(port = "COM6")
+    robot = OmniController(port = "/dev/ttyACM0")
     message = "x:0.1,y:0.0,o:0.0,dt:0.1,t_max:1.0"
+    robot.calculate_vels(message)
+    print(robot.vels)
+    robot.send_data("DT")
+    robot.send_data("DATA")
+
+    message = "x:0.0,y:0.1,o:0.0,dt:0.1,t_max:2.0"
     robot.calculate_vels(message)
     robot.send_data("DT")
     robot.send_data("DATA")
