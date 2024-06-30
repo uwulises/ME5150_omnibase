@@ -20,7 +20,7 @@ source ~/.bashrc
 
 echo "Creating virtual environment for server..."
 mkvirtualenv me5150 -p python3
-echo "Now you are in the virtual environment, to exit type 'deactivate'"
+workon me5150
 
 echo "Updating pip..."
 pip install --upgrade pip 

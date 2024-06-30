@@ -12,7 +12,7 @@ git clone https://github.com/uwulises/ME5150_omnibase.git
 4. Create virtual environment named "omnibase".
 ```sh
 cd client
-conda env create -n omnibase
+conda create -n omnibase python=3.9
 conda activate omnibase
 ```
 5. Install all required packages. This may take a while.
