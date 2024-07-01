@@ -21,10 +21,17 @@ float PIDController::compute(float feedback){
     float error = setpoint - feedback;
     integral += error * delta_time;
     float derivative = (error - prev_error) / delta_time;
-    float output = Kp * error + Ki * integral + Kd * derivative;
+    float cal = Kp * error + Ki * integral + Kd * derivative;
     prev_error = error;
 
-    output = constrain(output, outputMin, outputMax);
+    int output = constrain(cal, outputMin, outputMax);
+    // Serial.print(setpoint);
+    // Serial.print('\t');
+    // Serial.print(feedback);
+    // Serial.print('\t');
+    // Serial.print(cal);
+    // Serial.print('\t');
+    // Serial.println(output);
     //debug(error, integral, derivative, output);
     return output;
 }
@@ -33,6 +40,7 @@ void PIDController::setSetpoint(float setpointValue) {
     setpoint = setpointValue;
     integral = 0;
     prev_error = 0;
+    // last_time = millis();
 }
 
 void PIDController::debug(float error, float integral, float derivative, float output) {
