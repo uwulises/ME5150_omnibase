@@ -3,7 +3,7 @@ import serial
 
 class SendVelocities:
     # Initialize the serial port
-    def __init__(self, port="/dev/serial0"):
+    def __init__(self, port="/dev/ttyACM0"):
         self.port = port
         self.serial = None
         self.open()
@@ -37,6 +37,7 @@ class SendVelocities:
         for vels in velocities:
             msg += self.format_vel(vels)
         self.send(msg)
+        print(msg)
         print("Path sent")
 
     def send_dt(self, dt):

@@ -31,8 +31,8 @@ float PIDController::compute(float feedback){
 
 void PIDController::setSetpoint(float setpointValue) {
     setpoint = setpointValue;
-    integral = 0;
     prev_error = 0;
+    integral = 0;
 }
 
 void PIDController::debug(float error, float integral, float derivative, float output) {

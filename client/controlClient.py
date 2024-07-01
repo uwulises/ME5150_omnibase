@@ -81,9 +81,9 @@ def main():
     ip_server = 'omni1.local'
     ip_server = '192.168.166.233'
     client = ControlClient(ip_server, 12345)
-    msg = 'x:0.5,y:0.0,o:0,dt:0.1,t_max:3' # x[mm], y[mm], o[rad], dt[s], t_max[s
-    client.send(msg)
-    msg = 'x:0.0,y:0.2,o:0,dt:0.1,t_max:5'
+    # msg = 'x:0.0001,y:0.0,o:0,dt:0.2,t_max:2' # x[mm], y[mm], o[rad], dt[s], t_max[s
+    # client.send(msg)
+    msg = 'x:0.0,y:0.02,o:0,dt:0.2,t_max:2'
     client.send(msg)
     # msg = 'x:0.0,y:0.0,o:0,dt:0.1,t_max:5'
     # client.send(msg)

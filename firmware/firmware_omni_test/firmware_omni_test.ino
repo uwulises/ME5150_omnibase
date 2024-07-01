@@ -61,7 +61,9 @@ void isrB3() {
   encoders[3].updateB();
 }
 
+
 // Variables seriales
+
 SerialReceiver serialR;
 float dt = 0;
 String msg = "";
@@ -88,120 +90,133 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(encoders[3].pinB), isrB3, CHANGE);
 
   Serial.begin(115200);
-  while (!Serial) {
-    ;  // Esperar a que el puerto serie esté listo
-  }
+  // while (!Serial) {
+  //   ;  // Esperar a que el puerto serie esté listo
+  // }
   delay(3000);  // Espera inicial para dar tiempo a la conexión serie
   state = 1;    // Inicia en el estado 1
 }
 
 void loop() {
-
-  // Si se corta la comunicación serie, detener los motores
-  if (!Serial) {
-    state = 0;
-  } else {  // Si hay comunicación serie, actualizar la velocidad de los motores
-    updateSpeed();
-  }
-
-  switch (state) {
-
-    // Estado 0: Si no hay comunicación serie, detener los motores
-    case 0:
-      if (!Serial) {
-        stop_motors();  // Detener los motores
-        state = 0;      // Mantener en estado 0 si no hay comunicación serie
-      } else {          // Si hay comunicación serie, pasar al estado 1
-        dt = 0;
-        msg = "";
-        state = 1;  // Pasar al estado 1 si hay comunicación serie
-      }
-      break;
-
-    // Estado 1: Obtener dt del monitor serie
-    case 1:
-      if (millis() - last_ready >= dt_ready) {
-        last_ready = millis();
-        serialR.sendMsg("DT");
-      }
-      stop_motors();
-      serialR.receiveData();
-      dt = serialR.getMsg().toFloat();
-
-      if (dt != 0) {
-
-        serialR.sendMsg("OK1");
-        state = 2;  // Pasar al estado 2 después de enviar "Dt"
-        serialR.setMsg();
-      }
-      break;
-
-    // Estado 2: Recibir trayectoria a traves del monitor serie
-    case 2:
-      stop_motors();
-      if (millis() - last_ready >= dt_ready) {  // Si ha pasado dt_ready ms
-        last_ready = millis();
-        serialR.sendMsg("DATA");                // Enviar "waiting data"
-      }
-      serialR.receiveData();
-      msg = serialR.getMsg();
-      if (msg != "") {
-        state = 3;  // Pasar al estado 3 si se recibe algún mensaje
-      }
-      break;
-
-    // Estado 3: Obtener la siguiente acción para el robot
-    case 3:
-      // Procesar el mensaje del monitor serie
-      serialR.processMsg();
-      serialR.splitAction();
-      last_ready = millis();
- 
-      // Pasar al estado 4 después de procesar el mensaje
-      state = 4;
-      break;
-
-    // Estado 4: Mover el robot
-    case 4:
-      // Si ha pasado menos que dt
-      if (millis() - last_ready < dt * 1000) {
-        omni_IK(serialR.Vx, serialR.Vy, serialR.w);  // en metros y rads/seg, Vx hacia adelante
-        apply_PID();
-        break;
-      }
-      msg = serialR.getMsg();
-
-      if (msg == "") {
-        serialR.sendMsg("OK2");
-        state = 1;  // Volver al estado 2 si no hay mensaje
-
-      } else {
-        state = 3;  // Volver al estado 3 si hay mensaje
-      }
-      break;
-
-    default:
-      state = 0;
-      break;
-  }
+  float Vx = 0.0;
+  float Vy = 2.0;
+  float w = 0.0;
+  updateSpeed();
+  // if (millis() - last_ready < dt * 1000) {
+  omni_IK(Vx, Vy, w);  // en metros y rads/seg, Vx hacia adelante
+  apply_PID();
+  // last_ready = millis();
+  // }
 }
+
+// void loop() {
+
+//   // Si se corta la comunicación serie, detener los motores
+//   if (!Serial) {
+//     state = 0;
+//   } else {  // Si hay comunicación serie, actualizar la velocidad de los motores
+//     updateSpeed();
+//   }
+
+//   switch (state) {
+
+//     // Estado 0: Si no hay comunicación serie, detener los motores
+//     case 0:
+//       if (!Serial) {
+//         stop_motors();  // Detener los motores
+//         state = 0;      // Mantener en estado 0 si no hay comunicación serie
+//       } else {          // Si hay comunicación serie, pasar al estado 1
+//         dt = 0;
+//         msg = "";
+//         state = 1;  // Pasar al estado 1 si hay comunicación serie
+//       }
+//       break;
+
+//     // Estado 1: Obtener dt del monitor serie
+//     case 1:
+//       if (millis() - last_ready >= dt_ready) {
+//         last_ready = millis();
+//         serialR.sendMsg("DT");
+//       }
+//       stop_motors();
+//       serialR.receiveData();
+//       dt = serialR.getMsg().toFloat();
+
+//       if (dt != 0) {
+
+//         serialR.sendMsg("OK1");
+//         state = 2;  // Pasar al estado 2 después de enviar "Dt"
+//         serialR.setMsg();
+//       }
+//       break;
+
+//     // Estado 2: Recibir trayectoria a traves del monitor serie
+//     case 2:
+//       stop_motors();
+//       if (millis() - last_ready >= dt_ready) {  // Si ha pasado dt_ready ms
+//         last_ready = millis();
+//         serialR.sendMsg("DATA");                // Enviar "waiting data"
+//       }
+//       serialR.receiveData();
+//       msg = serialR.getMsg();
+//       if (msg != "") {
+//         state = 3;  // Pasar al estado 3 si se recibe algún mensaje
+//       }
+//       break;
+
+//     // Estado 3: Obtener la siguiente acción para el robot
+//     case 3:
+//       // Procesar el mensaje del monitor serie
+//       serialR.processMsg();
+//       serialR.splitAction();
+//       last_ready = millis();
+
+//       // Pasar al estado 4 después de procesar el mensaje
+//       state = 4;
+//       break;
+
+//     // Estado 4: Mover el robot
+//     case 4:
+//       // Si ha pasado menos que dt
+//       if (millis() - last_ready < dt * 1000) {
+//         omni_IK(serialR.Vx, serialR.Vy, serialR.w);  // en metros y rads/seg, Vx hacia adelante
+//         apply_PID();
+//         break;
+//       }
+//       msg = serialR.getMsg();
+
+//       if (msg == "") {
+//         serialR.sendMsg("OK2");
+//         state = 1;  // Volver al estado 2 si no hay mensaje
+
+//       } else {
+//         state = 3;  // Volver al estado 3 si hay mensaje
+//       }
+//       break;
+
+//     default:
+//       state = 0;
+//       break;
+//   }
+// }
 
 
 void omni_IK(float Vx, float Vy, float w) {
   /* Set linear and angular velocity for the robot.
-    @param linealVelocityX   linear velocity on the x axis, in m/s
+    @param linealVelocityX   linear velocity on the x axis, in m/s frente
     @param linealVelocityY   linear velocity on the y axis, in m/s
     @param angularVelocity   angular velocity, in rad/s
   */
-  float w1 = (Vx + Vy + (lxy / 1000.0) * w) * 1000.0 / r;   // rads/sec
+  float w1 = (Vx + Vy + (lxy / 1000.0) * w) * 1000.0 / r;  // rads/sec
   float w2 = (Vx - Vy - (lxy / 1000.0) * w) * 1000.0 / r;  // rads/sec
-  float w3 = (Vx - Vy + (lxy / 1000.0) * w) * 1000.0 / r;   // rads/sec
+  float w3 = (Vx - Vy + (lxy / 1000.0) * w) * 1000.0 / r;  // rads/sec
   float w4 = (Vx + Vy - (lxy / 1000.0) * w) * 1000.0 / r;  // rads/sec
 
   pid_controllers[0].setSetpoint(w1 * rad2enc);  // steps per sec
   pid_controllers[1].setSetpoint(w2 * rad2enc);  // steps per sec
   pid_controllers[2].setSetpoint(w3 * rad2enc);  // steps per sec
   pid_controllers[3].setSetpoint(w4 * rad2enc);  // steps per sec
+  Serial.println(w2);
 }
 
 bool withinTolerance(float signals[]) {
@@ -216,17 +231,12 @@ bool withinTolerance(float signals[]) {
 }
 
 void apply_PID() {
+  // if (millis() - t1_pid >= dt_pid) {  //} && !withinTolerance(controlSpeed)) {
+  // t1_pid = millis();
   for (int i = 0; i < NUM_ENCODERS; i++) {
     controlSpeed[i] = pid_controllers[i].compute(motorSpeed[i]);
     set_motor_vel(i, controlSpeed[i]);
   }
-  // Serial.print(controlSpeed[0]);
-  // Serial.print('\t');
-  // Serial.print(controlSpeed[1]);
-  // Serial.print('\t');
-  // Serial.print(controlSpeed[2]);
-  // Serial.print('\t');
-  // Serial.println(controlSpeed[3]);
 }
 
 void set_motor_vel(int motor, int pwm) {  // vel: steps per sec
@@ -261,12 +271,20 @@ void updateSpeed() {
     for (int i = 0; i < NUM_ENCODERS; i++) {
       motorPos[i] = encoders[i].position;
       motorSpeed[i] = (motorPos[i] - motorPrevPos[i]) / (dt_vel / 1000.0);
+      motorPrevPos[i] = motorPos[i];
     }
-
     for (int i = 0; i < NUM_ENCODERS; i++) {
       if (abs(motorSpeed[i]) < 150) {
         motorSpeed[i] = 0;
       }
     }
   }
+  // Serial.print("Real v:\t");
+  // Serial.print(motorSpeed[0]);
+  // Serial.print('\t');
+  // Serial.print(motorSpeed[1]);
+  // Serial.print('\t');
+  // Serial.print(motorSpeed[2]);
+  // Serial.print('\t');
+  // Serial.println(motorSpeed[3]);
 }
