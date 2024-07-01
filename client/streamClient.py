@@ -88,7 +88,7 @@ class VideoShow():
 def main():
     import time
     import cv2
-    robot = StreamClient("192.168.166.233")
+    robot = StreamClient("192.168.100.101")
 
     # Show video
     robot.showVideo()

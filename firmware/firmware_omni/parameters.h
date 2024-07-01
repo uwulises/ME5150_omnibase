@@ -29,7 +29,7 @@ unsigned long t1_pid = 0;
 
 /* Parametros omni */
 const int l = 75;  // Mitad de la distancia entre las ruedas delanteras y traseras, e izquierdas y derechas, en mm
-const int r = 27;  // Radio de las ruedas, en mm
+const int r = 30;  // Radio de las ruedas, en mm
 const int lxy = sqrt(2) * l;
 
 const int encoder_resolution = 2500;                // encoder steps per revolution

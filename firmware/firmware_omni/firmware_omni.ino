@@ -202,10 +202,10 @@ void omni_IK(float Vx, float Vy, float w) {
     @param angularVelocity   angular velocity, in rad/s
   */
 
-  float w1 = (Vx + Vy + (lxy / 1000.0) * w) * 1000.0 / r;  // rads/sec
-  float w2 = (Vx - Vy - (lxy / 1000.0) * w) * 1000.0 / r;  // rads/sec
-  float w3 = (Vx - Vy + (lxy / 1000.0) * w) * 1000.0 / r;  // rads/sec
-  float w4 = (Vx + Vy - (lxy / 1000.0) * w) * 1000.0 / r;  // rads/sec
+  float w1 = (Vx + Vy + (lxy / 1000.0) * w * 10) * 1000.0 / r;  // rads/sec
+  float w2 = (Vx - Vy - (lxy / 1000.0) * w * 10) * 1000.0 / r;  // rads/sec
+  float w3 = (Vx - Vy + (lxy / 1000.0) * w * 10) * 1000.0 / r;  // rads/sec
+  float w4 = (Vx + Vy - (lxy / 1000.0) * w * 10) * 1000.0 / r;  // rads/sec
 
   pid_controllers[0].setSetpoint(w1 * rad2enc);  // steps per sec
   pid_controllers[1].setSetpoint(w2 * rad2enc);  // steps per sec
