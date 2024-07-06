@@ -53,6 +53,7 @@ void SerialReceiver::clearSerialBuffer() {
 }
 
 String SerialReceiver::getAction() {
+  Serial.println(action);
   return action;
 }
 

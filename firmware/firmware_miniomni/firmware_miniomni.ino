@@ -29,10 +29,10 @@ float motorSpeed[] = { 0.0, 0.0, 0.0, 0.0 };
 float controlSpeed[NUM_ENCODERS];
 
 PIDController pid_controllers[NUM_ENCODERS] = {
-  PIDController(0.01, 0.0001, 0.0),
-  PIDController(0.01, 0.0001, 0.0),
-  PIDController(0.01, 0.0001, 0.0),
-  PIDController(0.01, 0.0001, 0.0),
+  PIDController(0.005, 0.0001, 0.0),
+  PIDController(0.005, 0.0001, 0.0),
+  PIDController(0.005, 0.0001, 0.0),
+  PIDController(0.005, 0.0001, 0.0),
 };
 
 // IGNORE
@@ -61,14 +61,13 @@ void isrB3() {
   encoders[3].updateB();
 }
 
-
 // Variables seriales
-
 SerialReceiver serialR;
 float dt = 0;
 String msg = "";
-
 long unsigned int dt_ready = 3000;
+long unsigned int dt_pid = 100;
+long unsigned int last_pid = millis();
 long unsigned int last_ready = 0;
 int state = 0;
 
@@ -92,8 +91,7 @@ void setup() {
   while (!Serial) {
     ;  // Esperar a que el puerto serie esté listo
   }
-  delay(3000);  // Espera inicial para dar tiempo a la conexión serie
-  state = 1;    // Inicia en el estado 1
+  state = 1;  // Inicia en el estado 1
 }
 
 void loop() {
@@ -110,9 +108,9 @@ void loop() {
     // Estado 0: Si no hay comunicación serie, detener los motores
     case 0:
       if (!Serial) {
-        stop_motors();        // Detener los motores
-        state = 0;            // Mantener en estado 0 si no hay comunicación serie
-      } else {                // Si hay comunicación serie, pasar al estado 1
+        stop_motors();  // Detener los motores
+        state = 0;      // Mantener en estado 0 si no hay comunicación serie
+      } else {          // Si hay comunicación serie, pasar al estado 1
         dt = 0;
         msg = "";
         state = 1;  // Pasar al estado 1 si hay comunicación serie
@@ -120,29 +118,29 @@ void loop() {
       break;
 
     // Estado 1: Obtener dt del monitor serie
-    case 1: 
+    case 1:
       if (millis() - last_ready >= dt_ready) {
         last_ready = millis();
-        serialR.sendMsg("waiting dt");
-        serialR.clearSerialBuffer();
+        serialR.sendMsg("DT");
       }
+      stop_motors();
       serialR.receiveData();
       dt = serialR.getMsg().toFloat();
 
       if (dt != 0) {
-        serialR.sendMsg("Dt received");
-        state = 2;  // Pasar al estado 2 después de enviar "Dt"
+        serialR.sendMsg("OK1");
+        state = 2;  // Pasar al estado 2 después de enviar "OK1"
         serialR.setMsg();
       }
       break;
 
     // Estado 2: Recibir trayectoria a traves del monitor serie
-    case 2: 
+    case 2:
       if (millis() - last_ready >= dt_ready) {  // Si ha pasado dt_ready ms
         last_ready = millis();
-        serialR.sendMsg("waiting data");        // Enviar "waiting data"
-        serialR.clearSerialBuffer();            // y limpiar el buffer serie
+        serialR.sendMsg("DATA");
       }
+      stop_motors();
       serialR.receiveData();
       msg = serialR.getMsg();
       if (msg != "") {
@@ -151,8 +149,7 @@ void loop() {
       break;
 
     // Estado 3: Obtener la siguiente acción para el robot
-    case 3: 
-
+    case 3:
       // Procesar el mensaje del monitor serie
       serialR.processMsg();
       serialR.splitAction();
@@ -163,20 +160,22 @@ void loop() {
       break;
 
     // Estado 4: Mover el robot
-    case 4: 
-
+    case 4:
       // Si ha pasado menos que dt
       if (millis() - last_ready < dt * 1000) {
-        omni_IK(serialR.Vx, serialR.Vy, serialR.w);  // en metros y rads/seg, Vx hacia adelante
+        if (millis() - last_pid > dt_pid) {
+          omni_IK(serialR.Vx, serialR.Vy, serialR.w);  // en metros y rads/seg, Vy hacia adelante
+          compute_PID();
+          last_pid = millis();
+        }
         apply_PID();
         break;
       }
-      
       msg = serialR.getMsg();
 
       if (msg == "") {
-        state = 2;  // Volver al estado 2 si no hay mensaje
-        serialR.sendMsg("Traj");
+        serialR.sendMsg("OK2");
+        state = 1;  // Volver al estado 2 si no hay mensaje
 
       } else {
         state = 3;  // Volver al estado 3 si hay mensaje
@@ -190,21 +189,18 @@ void loop() {
 }
 
 
-void omni_IK(float Vx, float Vy, float w) {
-  /* Set linear and angular velocity for the robot.
-    @param linealVelocityX   linear velocity on the x axis, in m/s
-    @param linealVelocityY   linear velocity on the y axis, in m/s
-    @param angularVelocity   angular velocity, in rad/s
-  */
-  float w1 = (Vx + Vy + (lxy / 1000.0) * w) * 1000.0 / r;   // rads/sec
-  float w2 = -(Vx - Vy - (lxy / 1000.0) * w) * 1000.0 / r;  // rads/sec
-  float w3 = (Vx - Vy + (lxy / 1000.0) * w) * 1000.0 / r;   // rads/sec
-  float w4 = -(Vx + Vy - (lxy / 1000.0) * w) * 1000.0 / r;  // rads/sec
+void miniomni_IK(float Vx, float Vy, float w) {
+
+  float w1 = (-sin(QUARTER_PI) * Vx + cos(QUARTER_PI) * Vy + R * w) * 1 / r;          // rads/sec
+  float w2 = (-sin(3 * QUARTER_PI) * Vx + cos(3 * QUARTER_PI) * Vy + R * w) * 1 / r;  // rads/sec
+  float w3 = (-sin(5 * QUARTER_PI) * Vx + cos(5 * QUARTER_PI) * Vy + R * w) * 1 / r;  // rads/sec
+  float w4 = (-sin(7 * QUARTER_PI) * Vx + cos(7 * QUARTER_PI) * Vy + R * w) * 1 / r;  // rads/sec
 
   pid_controllers[0].setSetpoint(w1 * rad2enc);  // steps per sec
   pid_controllers[1].setSetpoint(w2 * rad2enc);  // steps per sec
   pid_controllers[2].setSetpoint(w3 * rad2enc);  // steps per sec
   pid_controllers[3].setSetpoint(w4 * rad2enc);  // steps per sec
+
 }
 
 bool withinTolerance(float signals[]) {
@@ -217,14 +213,15 @@ bool withinTolerance(float signals[]) {
   }
   return true;
 }
+void compute_PID() {
+  for (int i = 0; i < NUM_ENCODERS; i++) {
+    controlSpeed[i] = pid_controllers[i].compute(motorSpeed[i]);
+  }
+}
 
 void apply_PID() {
-  if (millis() - t1_pid >= dt_pid) {  //} && !withinTolerance(controlSpeed)) {
-    t1_pid = millis();
-    for (int i = 0; i < NUM_ENCODERS; i++) {
-      controlSpeed[i] = pid_controllers[i].compute(motorSpeed[i]);
-      set_motor_vel(i, controlSpeed[i]);
-    }
+  for (int i = 0; i < NUM_ENCODERS; i++) {
+    set_motor_vel(i, controlSpeed[i]);
   }
 }
 
@@ -235,13 +232,16 @@ void set_motor_vel(int motor, int pwm) {  // vel: steps per sec
   */
   int IN1_PIN = motors[motor][0];
   int IN2_PIN = motors[motor][1];
+
+  int i_pwm = int(pwm);
   if (pwm < 0) {  // reverse speeds
-    analogWrite(IN1_PIN, -pwm);
+
+    analogWrite(IN1_PIN, -i_pwm);
     digitalWrite(IN2_PIN, LOW);
 
   } else {  // stop or forward
     digitalWrite(IN1_PIN, LOW);
-    analogWrite(IN2_PIN, pwm);
+    analogWrite(IN2_PIN, i_pwm);
   }
 }
 
@@ -262,6 +262,7 @@ void updateSpeed() {
       motorSpeed[i] = (motorPos[i] - motorPrevPos[i]) / (dt_vel / 1000.0);
       motorPrevPos[i] = motorPos[i];
     }
+
     for (int i = 0; i < NUM_ENCODERS; i++) {
       if (abs(motorSpeed[i]) < 150) {
         motorSpeed[i] = 0;

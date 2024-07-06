@@ -23,25 +23,16 @@
 
 
 int dt_vel = 100;      // Periodo de actualización velocidad, en milisegundos
-int dt_pid = 200;  // Periodo de actualización PID, en milisegundos
+// int dt_pid = 200;       // Periodo de actualización PID, en milisegundos
 unsigned long t1_mot = 0;
 unsigned long t1_pid = 0;
-
-
-
-/* Parametros omni */
-// const int l = 75;  // Mitad de la distancia entre las ruedas delanteras y traseras, e izquierdas y derechas, en mm
-// const int r = 27;  // Radio de las ruedas, en mm
-// const int lxy = sqrt(2) * l;
-
 
 /* Parametros miniomni*/
 const int R = 75;  // Distancia desde el centro de robot al centro de las ruedas, en mm
 const int r = 25;  // Radio de las ruedas, en mm
 
-
 const int encoder_resolution = 2500;                // encoder steps per revolution
-const int rad2enc = encoder_resolution / (2 * PI);  // encoder steps per radian 397
+const float rad2enc = encoder_resolution / (2 * PI);  // encoder steps per radian 397
 
 const int max_pwm = 255;                         // PWM
 const int max_w_rads = 20;                       // rads/s o 0.5 m/s
