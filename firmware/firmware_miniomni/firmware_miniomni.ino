@@ -29,10 +29,10 @@ float motorSpeed[] = { 0.0, 0.0, 0.0, 0.0 };
 float controlSpeed[NUM_ENCODERS];
 
 PIDController pid_controllers[NUM_ENCODERS] = {
-  PIDController(0.005, 0.0001, 0.0),
-  PIDController(0.005, 0.0001, 0.0),
-  PIDController(0.005, 0.0001, 0.0),
-  PIDController(0.005, 0.0001, 0.0),
+  PIDController(0.05, 0.0001, 0.0),
+  PIDController(0.05, 0.0001, 0.0),
+  PIDController(0.05, 0.0001, 0.0),
+  PIDController(0.05, 0.0001, 0.0),
 };
 
 // IGNORE
@@ -65,6 +65,8 @@ void isrB3() {
 SerialReceiver serialR;
 float dt = 0;
 String msg = "";
+String msg1 = "";
+String act = "";
 long unsigned int dt_ready = 3000;
 long unsigned int dt_pid = 100;
 long unsigned int last_pid = millis();
@@ -91,6 +93,7 @@ void setup() {
   while (!Serial) {
     ;  // Esperar a que el puerto serie esté listo
   }
+  // delay(3000);  // Espera inicial para dar tiempo a la conexión serie
   state = 1;  // Inicia en el estado 1
 }
 
@@ -129,7 +132,7 @@ void loop() {
 
       if (dt != 0) {
         serialR.sendMsg("OK1");
-        state = 2;  // Pasar al estado 2 después de enviar "OK1"
+        state = 2;  // Pasar al estado 2 después de enviar "Dt"
         serialR.setMsg();
       }
       break;
@@ -138,7 +141,7 @@ void loop() {
     case 2:
       if (millis() - last_ready >= dt_ready) {  // Si ha pasado dt_ready ms
         last_ready = millis();
-        serialR.sendMsg("DATA");
+        serialR.sendMsg("DATA");  // Enviar "waiting data"
       }
       stop_motors();
       serialR.receiveData();
@@ -152,7 +155,9 @@ void loop() {
     case 3:
       // Procesar el mensaje del monitor serie
       serialR.processMsg();
+      // serialR.getAction();
       serialR.splitAction();
+      // Serial.println();
       last_ready = millis();
 
       // Pasar al estado 4 después de procesar el mensaje
@@ -164,8 +169,9 @@ void loop() {
       // Si ha pasado menos que dt
       if (millis() - last_ready < dt * 1000) {
         if (millis() - last_pid > dt_pid) {
-          omni_IK(serialR.Vx, serialR.Vy, serialR.w);  // en metros y rads/seg, Vy hacia adelante
+          omni_IK(serialR.Vx, serialR.Vy, serialR.w);  // en metros y rads/seg, Vx hacia adelante
           compute_PID();
+          // Serial.println("ja");
           last_pid = millis();
         }
         apply_PID();
@@ -189,18 +195,25 @@ void loop() {
 }
 
 
-void miniomni_IK(float Vx, float Vy, float w) {
+void omni_IK(float Vx, float Vy, float w) {
+  /* Set linear and angular velocity for the robot.
+    @param linealVelocityX   linear velocity on the x axis, in m/s
+    @param linealVelocityY   linear velocity on the y axis, in m/s
+    @param angularVelocity   angular velocity, in rad/s
+  */
 
-  float w1 = (-sin(QUARTER_PI) * Vx + cos(QUARTER_PI) * Vy + R * w) * 1 / r;          // rads/sec
-  float w2 = (-sin(3 * QUARTER_PI) * Vx + cos(3 * QUARTER_PI) * Vy + R * w) * 1 / r;  // rads/sec
-  float w3 = (-sin(5 * QUARTER_PI) * Vx + cos(5 * QUARTER_PI) * Vy + R * w) * 1 / r;  // rads/sec
-  float w4 = (-sin(7 * QUARTER_PI) * Vx + cos(7 * QUARTER_PI) * Vy + R * w) * 1 / r;  // rads/sec
+  float w1 = (-sin(QUARTER_PI) * Vx + cos(QUARTER_PI) * Vy + R / 1000.0 * w) * 1000.0 / r;          // rads/sec
+  float w2 = (-sin(3 * QUARTER_PI) * Vx + cos(3 * QUARTER_PI) * Vy + R * w) * 1000.0 / r;  // rads/sec
+  float w3 = (-sin(5 * QUARTER_PI) * Vx + cos(5 * QUARTER_PI) * Vy + R * w) * 1000.0 / r;  // rads/sec
+  float w4 = (-sin(7 * QUARTER_PI) * Vx + cos(7 * QUARTER_PI) * Vy + R * w) * 1000.0 / r;  // rads/sec
 
   pid_controllers[0].setSetpoint(w1 * rad2enc);  // steps per sec
   pid_controllers[1].setSetpoint(w2 * rad2enc);  // steps per sec
   pid_controllers[2].setSetpoint(w3 * rad2enc);  // steps per sec
   pid_controllers[3].setSetpoint(w4 * rad2enc);  // steps per sec
 
+  String lo = String(w1)+'\t'+String(w2)+'\t'+String(w3)+'\t'+String(w4);
+  Serial.println(lo);
 }
 
 bool withinTolerance(float signals[]) {
@@ -223,6 +236,13 @@ void apply_PID() {
   for (int i = 0; i < NUM_ENCODERS; i++) {
     set_motor_vel(i, controlSpeed[i]);
   }
+  // Serial.print(controlSpeed[0]);
+  // Serial.print('\t');
+  // Serial.print(controlSpeed[1]);
+  // Serial.print('\t');
+  // Serial.print(controlSpeed[2]);
+  // Serial.print('\t');
+  // Serial.println(controlSpeed[3]);
 }
 
 void set_motor_vel(int motor, int pwm) {  // vel: steps per sec
